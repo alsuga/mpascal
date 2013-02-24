@@ -116,7 +116,7 @@ from ply.lex import lex
 
 tokens = [
 	# keywords
-	'ID', 'CONST', 'VAR', 'PRINT', 'FUNC', 'EXTERN',
+	'ID', 'CONST', 'VAR', 'PRINT', 'FUN', 'EXTERN',
   'BEGIN', 'THEN', 'END',
 
 	# Control flow
@@ -125,7 +125,7 @@ tokens = [
 	# Operators and delimiters
 	'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
 	'ASSIGN', 'SEMI', 'LPAREN', 'RPAREN', 'COMMA',
-	'LBRACE', 'RBRACE',
+	'LBRACKET', 'RBRACKET', 'COLON',
 
 	# Boolean operators
 	'LT', 'LE', 'GT', 'GE', 'LAND', 'LOR', 'LNOT',
@@ -152,12 +152,12 @@ t_PLUS      = r'\+'
 t_MINUS     = r'-'
 t_TIMES     = r'\*'
 t_DIVIDE    = r'/'
-t_ASSIGN    = r'='
+t_ASSIGN    = r':='
 t_SEMI      = r';'
 t_LPAREN    = r'\('
 t_RPAREN    = r'\)'
-t_LBRACE    = r'{'
-t_RBRACE    = r'}'
+t_LBRACKET  = r'\['
+t_RBRACKET  = r'\]'
 t_COMMA     = r','
 t_LT        = r'<'
 t_LE        = r'<='
@@ -165,9 +165,10 @@ t_EQ        = r'=='
 t_GE        = r'>='
 t_GT        = r'>'
 t_NE        = r'!='
-t_LAND      = r'&&'
-t_LOR       = r'\|\|'
-t_LNOT      = r'!'
+t_LAND      = r'and'
+t_LOR       = r'or'
+t_LNOT      = r'not'
+t_COLON     = r':'
 # ----------------------------------------------------------------------
 # *** DEBE COMPLETAR : escriba las regexps y codigo adicional para ***
 #
@@ -297,7 +298,7 @@ reserved = {
 	'while':'WHILE',
 	'var':'VAR',
 	'const':'CONST',
-	'func':'FUNC',
+	'fun':'FUN',
 	'extern':'EXTERN',
 	'print':'PRINT',
   'begin':'BEGIN',
@@ -310,20 +311,23 @@ operators = {
 	r'-' : "MINUS",
 	r'*' : "TIMES",
 	r'/' : "DIVIDE",
-	r'=' : "ASSIGN",
+	r':=' : "ASSIGN",
 	r';' : "SEMI",
 	r'(' : "LPAREN",
 	r')' : "RPAREN",
 	r',' : "COMMA",
+  r':' : "COLON",
+  r'[' : "LBRACKET",
+  r']' : "RBRACKET",
 	r'<' : "LT",
 	r'<=' : "LE",
 	r'==' : "EQ",
 	r'>=' : "GE",
 	r'>' : "GT",
 	r'!=' : "NE",
-	r'&&' : "LAND",
-	r'||' : "LOR",
-	r'!' : "LNOT",
+	r'and' : "LAND",
+	r'or' : "LOR",
+	r'not' : "LNOT",
 }
 
 # ----------------------------------------------------------------------
