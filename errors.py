@@ -45,7 +45,7 @@ Para recoger mensajes de error para el proposito de pruebas unitarias, haga esto
             run_compiler()
        # Comprobar errs para errores especificos
 
-La funcíon de utilidad errors_reported() devuelve el numero total de
+La funcion de utilidad errors_reported() devuelve el numero total de
 errores reportados hasta el momento.  Las diferentes estapas del compilador
 podrian utilizar esto para decidir si se continua o no con el proceso.
 

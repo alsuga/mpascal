@@ -1,0 +1,8 @@
+func foo(x:int)
+begin
+  if x > 0 then
+    return(3.4)
+  else
+    return(3)
+  end
+

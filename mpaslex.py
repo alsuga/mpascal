@@ -13,7 +13,7 @@ Resumen:
 --------
 El proceso del analisis lexico consiste en tomar una entrada y dividirla
 en un flujo de tokens (simbolos). Cada token es como una palabra valida
-del diccionario.  Esencialmente, la función del analizador lexico es
+del diccionario.  Esencialmente, la funcion del analizador lexico es
 simplemente asegurar que el texto de entrada se compone de simbolos validos
 antes de cualquier procesamiento adicional relacionado con el parsing 
 (analisis sintatico).
@@ -91,7 +91,7 @@ ejecutarlos con algunas pruebas mas dificiles:
      bash % python mpaslex.py testlex1.pas
      bash % python mpaslex.py testlex2.pas
 
-Bonos: ¿Que haria usted para convertir estas pruebas en pruebas unitarias
+Bonos: Que haria usted para convertir estas pruebas en pruebas unitarias
 adecuadas?
 '''
 
@@ -117,6 +117,7 @@ from ply.lex import lex
 tokens = [
 	# keywords
 	'ID', 'CONST', 'VAR', 'PRINT', 'FUNC', 'EXTERN',
+  'BEGIN', 'THEN', 'END',
 
 	# Control flow
 	'IF', 'ELSE', 'WHILE',
@@ -167,7 +168,6 @@ t_NE        = r'!='
 t_LAND      = r'&&'
 t_LOR       = r'\|\|'
 t_LNOT      = r'!'
-
 # ----------------------------------------------------------------------
 # *** DEBE COMPLETAR : escriba las regexps y codigo adicional para ***
 #
@@ -180,7 +180,7 @@ t_LNOT      = r'!'
 #
 # El valor debe ser convertido a un float de Python cuando se analice
 def t_FLOAT(t):
-	r'(?:\d*\.\d+|\d+\.\d*)(?:[eE][-+]?\d+)?'
+	r'(?: (?:\d*\.\d+|\d+\.\d*)(?:[eE][-+]?\d+)?)?(?:\d[eE][-+]?\d+)'
 	t.value = float(t.value)               # Conversion a float de Python
 	return t
 
@@ -245,7 +245,7 @@ def _replace_escape_codes(t):
 			c1 = ostring.next()
 			#if c1 not in escapes_not_b:
 			if c1 not in escapes:
-				error(t.lexer.lineno,"Codigo secuencia escape mala '%s'" % escape_code)
+				error(t.lexer.lineno,"Codigo secuencia escape mala '%s'" % (c+c1))
 			else:
 				if c1=='n':
 					c='\n'
@@ -300,6 +300,9 @@ reserved = {
 	'func':'FUNC',
 	'extern':'EXTERN',
 	'print':'PRINT',
+  'begin':'BEGIN',
+  'end':'END',
+  'then':'THEN',
 }
 
 operators = {
