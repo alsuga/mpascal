@@ -1,8 +1,12 @@
-program : functions
-         | program function
-         ;
+program : fun main LPAR RPAR locals begin statements end functions
+        | functions fun main LPAR RPAR locals begin statements end
+        ;
 
-function : fun ID LPAR arguments RPAR locals BEGIN statements END
+functions : functions function
+          | function
+          ;
+
+function : fun ID LPAR arguments RPAR locals begin statements end
          ;
 
 arguments : variable
@@ -27,12 +31,12 @@ type : int
      | float LBRACKET expr RBRACKET
      ;
 
-expr : expr + expr
-     | expr - expr
-     | expr * expr
-     | expr / expr 
-     | - expr
-     | + expr
+expr : expr PLUS expr
+     | expr MINUS expr
+     | expr TIMES expr
+     | expr DIVIDE expr 
+     | MINUS expr
+     | PLUS expr
      | LPAR expr RPAR
      | ID LPAR expr RPAR
      | ID
@@ -44,17 +48,17 @@ conv : int LPAR expr RPAR
      | float LPAR expr RPAR
      ;
 
-Erela : expr < expr
-      | expr > expr
-      | expr <= expr
-      | expr >= expr
-      | expr == expr
-      | expr != expr
+Erela : expr LESS expr
+      | expr GREATER expr
+      | expr LESSEQUAL expr
+      | expr GREATEREQUAL expr
+      | expr EQUAL expr
+      | expr DISTINT expr
       ;
 
-relation : relation and relation
-         | relation or relation
-         | not relation 
+relation : relation AND relation
+         | relation OR relation
+         | NOT relation 
          | LPAR relation RPAR
          | Erela
          ;
@@ -63,3 +67,16 @@ statements : while relation do statements
            | if relation then statements
            | if relation then statements else statements
            | ID := expr
+           | print LPAR LITERAL RPAR
+           | write LPAR expr RPAR
+           | read LPAR ID RPAR
+           | return expr
+           | ID LPAR arguments RPAR
+           | skip
+           | break
+           | begin stat
+           ;
+
+stat : statements SEMICOLON
+     | statement end
+     ;
