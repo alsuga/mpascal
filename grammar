@@ -74,9 +74,5 @@ statements : while relation do statements
            | ID LPAR arguments RPAR
            | skip
            | break
-           | begin stat
+           | begin statements end
            ;
-
-stat : statements SEMICOLON
-     | statement end
-     ;
