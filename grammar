@@ -1,0 +1,65 @@
+program : functions
+         | program function
+         ;
+
+function : fun ID LPAR arguments RPAR locals BEGIN statements END
+         ;
+
+arguments : variable
+          | variable lvariable
+          |
+          ;
+
+lvariable : lvariabe COMMA variable
+          | variable
+          ;
+
+locals : locals variable SEMICOLON
+       | 
+       ;
+
+variable : ID COLON type
+         ;
+
+type : int
+     | float
+     | int LBRACKET expr RBRACKET
+     | float LBRACKET expr RBRACKET
+     ;
+
+expr : expr + expr
+     | expr - expr
+     | expr * expr
+     | expr / expr 
+     | - expr
+     | + expr
+     | LPAR expr RPAR
+     | ID LPAR expr RPAR
+     | ID
+     | ID LBRACKET expr RBRACKET
+     | Conv
+     ;
+
+conv : int LPAR expr RPAR
+     | float LPAR expr RPAR
+     ;
+
+Erela : expr < expr
+      | expr > expr
+      | expr <= expr
+      | expr >= expr
+      | expr == expr
+      | expr != expr
+      ;
+
+relation : relation and relation
+         | relation or relation
+         | not relation 
+         | LPAR relation RPAR
+         | Erela
+         ;
+
+statements : while relation do statements 
+           | if relation then statements
+           | if relation then statements else statements
+           | ID := expr
