@@ -63,16 +63,25 @@ relation : relation AND relation
          | Erela
          ;
 
-statements : while relation do statements 
-           | if relation then statements
-           | if relation then statements else statements
-           | ID := expr
-           | print LPAR LITERAL RPAR
-           | write LPAR expr RPAR
-           | read LPAR ID RPAR
-           | return expr
-           | ID LPAR arguments RPAR
-           | skip
-           | break
-           | begin statements end
+statements : statements1
+           | statements2
            ;
+
+statements1 : while relation do statements 
+            | if relation then statements
+            | if relation then statements else statements
+            | begin statements end
+            ;
+
+
+
+statements2 : ID := expr
+            | print LPAR LITERAL RPAR
+            | write LPAR expr RPAR
+            | read LPAR ID RPAR
+            | return expr
+            | ID LPAR arguments RPAR
+            | skip
+            | break
+            ;
+
