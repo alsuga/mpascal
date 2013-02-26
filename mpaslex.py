@@ -115,24 +115,24 @@ from ply.lex import lex
 # estos nombres. Haciendolo se rompera las pruebas unitarias.
 
 tokens = [
-	# keywords
-	'ID', 'CONST', 'VAR', 'PRINT', 'FUN', 'EXTERN',
+  # keywords
+  'ID', 'CONST', 'VAR', 'PRINT', 'FUNC', 'EXTERN',
   'BEGIN', 'THEN', 'END',
 
-	# Control flow
-	'IF', 'ELSE', 'WHILE',
+  # Control flow
+  'IF', 'ELSE', 'WHILE',
 
-	# Operators and delimiters
-	'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
-	'ASSIGN', 'SEMI', 'LPAREN', 'RPAREN', 'COMMA',
-	'LBRACKET', 'RBRACKET', 'COLON',
+  # Operators and delimiters
+  'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
+  'ASSIGN', 'SEMI', 'LPAREN', 'RPAREN', 'COMMA',
+  'LBRACKET', 'RBRACKET', 'COLON',
 
-	# Boolean operators
-	'LT', 'LE', 'GT', 'GE', 'LAND', 'LOR', 'LNOT',
-	'EQ', 'NE',
+  # Boolean operators
+  'LT', 'LE', 'GT', 'GE', 'LAND', 'LOR', 'LNOT',
+  'EQ', 'NE',
 
-	# Literals
-	'INTEGER', 'FLOAT', 'STRING', 'BOOLEAN',
+  # Literals
+  'INTEGER', 'FLOAT', 'STRING', 'BOOLEAN',
 ]
 
 # ----------------------------------------------------------------------
@@ -181,9 +181,9 @@ t_COLON     = r':'
 #
 # El valor debe ser convertido a un float de Python cuando se analice
 def t_FLOAT(t):
-	r'(?: (?:\d*\.\d+|\d+\.\d*)(?:[eE][-+]?\d+)?)?(?:\d[eE][-+]?\d+)'
-	t.value = float(t.value)               # Conversion a float de Python
-	return t
+  r'(?: (?:\d*\.\d+|\d+\.\d*)(?:[eE][-+]?\d+)?)|(?:\d+[eE][-+]?\d+)'
+  t.value = float(t.value)               # Conversion a float de Python
+  return t
 
 # Constantes enteras.  Se debe reconocer enteros en todos los formatos
 # siguientes:
@@ -194,15 +194,15 @@ def t_FLOAT(t):
 #
 # El valor debe ser convertido a un int de Python cuando se analice.
 def t_INTEGER(t):
-	r'(?:0[xX]?)?\d+'
-	# Conversion a int de Python
-	if t.value.startswith(('0x','0X')):
-		t.value = int(t.value,16)              
-	elif t.value.startswith('0'):
-		t.value = int(t.value,8)
-	else:
-		t.value = int(t.value)
-	return t
+  r'(?:0[xX]?)?\d+'
+  # Conversion a int de Python
+  if t.value.startswith(('0x','0X')):
+    t.value = int(t.value,16)              
+  elif t.value.startswith('0'):
+    t.value = int(t.value,8)
+  else:
+    t.value = int(t.value)
+  return t
 
 # Constantes string.  Se debe reconocer texto entre comillas.
 # Por ejemplo:
@@ -230,49 +230,54 @@ def t_INTEGER(t):
 escapes_not_b = r'nrt\"'
 escapes = escapes_not_b + "b"
 def _replace_escape_codes(t):
-	r'''
-	*** SE DEBE IMPLEMENTAR ***
+  r'''
+  *** SE DEBE IMPLEMENTAR ***
 
-	Reemplace todos los codigos de escape validos \.. en una cadena con
-	su codigo de caracter raw equivalente.
-	'''
-	newval = []
-	ostring = iter(t.value)
-	olen = len(t.value)
-	for c in ostring:
-		if c=='"':
-			error("Fin de cadena prematuro")
-		elif c=='\\':
-			c1 = ostring.next()
-			#if c1 not in escapes_not_b:
-			if c1 not in escapes:
-				error(t.lexer.lineno,"Codigo secuencia escape mala '%s'" % (c+c1))
-			else:
-				if c1=='n':
-					c='\n'
-				elif c1=='r':
-					c='\r'
-				elif c1=='t':
-					c='\t'
-				elif c1=='\\':
-					c='\\'
-				elif c1=='"':
-					c='"'
-		newval.append(c)
-	else:
-		t.value = ''.join(newval)
+  Reemplace todos los codigos de escape validos \.. en una cadena con
+  su codigo de caracter raw equivalente.
+  '''
+  newval = []
+  ostring = iter(t.value)
+  olen = len(t.value)
+  for c in ostring:
+    if c=='"':
+      error("Fin de cadena prematuro")
+      t.lexer.skip(1)
+    elif c=='\\':
+      c1 = ostring.next()
+      #if c1 not in escapes_not_b:
+      if c1 not in escapes:
+        error(t.lexer.lineno,"Codigo secuencia escape mala '%s'" % (c+c1))
+        t.lexer.skip()
+        break
+      else:
+        if c1=='n':
+          c='\n'
+        elif c1=='r':
+          c='\r'
+        elif c1=='t':
+          c='\t'
+        elif c1=='\\':
+          c='\\'
+        elif c1=='"':
+          c='"'
+    newval.append(c)
+  else:
+    t.value = ''.join(newval)
 
 def t_STRING(t):
-	r'".*"'
-	# Convierta t.value a una cadena con codigo de escape reemplazado por valor actual.
-	t.value = t.value[1:-1]
-	_replace_escape_codes(t)    # Debe implementar arriba
-	return t
+  r'".*"'
+  # Convierta t.value a una cadena con codigo de escape reemplazado por valor actual.
+  t.value = t.value[1:-1]
+  _replace_escape_codes(t)    # Debe implementar arriba
+  return t
+
+
 
 def t_BOOLEAN(t):
-	r'\b(true|false)\b'
-	t.value = True if t.value=='true' else False
-	return t
+  r'\b(true|false)\b'
+  t.value = True if t.value=='true' else False
+  return t
 
 # ----------------------------------------------------------------------
 # *** DEBE COMPLETAR: Escrina la regexp y agrege la palabra ***
@@ -284,50 +289,50 @@ def t_BOOLEAN(t):
 # y puede contener un numero arbitrario de letras, digitos o subrayado 
 # despues de este.
 def t_ID(t):
-	r'[a-zA-Z_]\w*'
-	t.type = reserved.get(t.value,'ID')
-	return t
+  r'[a-zA-Z_]\w*'
+  t.type = reserved.get(t.value,'ID')
+  return t
 
 # *** DEBE IMPLEMENTAR ***
 # Adicione codigo para coincidir con palabras reservadas como 'var', 'const',
 # 'print', 'func', 'extern'
 
 reserved = {
-	'if':'IF',
-	'else':'ELSE',
-	'while':'WHILE',
-	'var':'VAR',
-	'const':'CONST',
-	'fun':'FUN',
-	'extern':'EXTERN',
-	'print':'PRINT',
+  'if':'IF',
+  'else':'ELSE',
+  'while':'WHILE',
+  'var':'VAR',
+  'const':'CONST',
+  'func':'FUNC',
+  'extern':'EXTERN',
+  'print':'PRINT',
   'begin':'BEGIN',
   'end':'END',
   'then':'THEN',
 }
 
 operators = {
-	r'+' : "PLUS",
-	r'-' : "MINUS",
-	r'*' : "TIMES",
-	r'/' : "DIVIDE",
-	r':=' : "ASSIGN",
-	r';' : "SEMI",
-	r'(' : "LPAREN",
-	r')' : "RPAREN",
-	r',' : "COMMA",
+  r'+' : "PLUS",
+  r'-' : "MINUS",
+  r'*' : "TIMES",
+  r'/' : "DIVIDE",
+  r':=' : "ASSIGN",
+  r';' : "SEMI",
+  r'(' : "LPAREN",
+  r')' : "RPAREN",
+  r',' : "COMMA",
   r':' : "COLON",
   r'[' : "LBRACKET",
   r']' : "RBRACKET",
-	r'<' : "LT",
-	r'<=' : "LE",
-	r'==' : "EQ",
-	r'>=' : "GE",
-	r'>' : "GT",
-	r'!=' : "NE",
-	r'and' : "LAND",
-	r'or' : "LOR",
-	r'not' : "LNOT",
+  r'<' : "LT",
+  r'<=' : "LE",
+  r'==' : "EQ",
+  r'>=' : "GE",
+  r'>' : "GT",
+  r'!=' : "NE",
+  r'and' : "LAND",
+  r'or' : "LOR",
+  r'not' : "LNOT",
 }
 
 # ----------------------------------------------------------------------
@@ -339,18 +344,23 @@ operators = {
 
 # Una o mas lineas en blanco
 def t_newline(t):
-	r'\n+'
-	t.lexer.lineno += len(t.value)
+  r'\n+'
+  t.lexer.lineno += len(t.value)
 
 # Comentarios C-style (/* ... */)
 def t_COMMENT(t):
-	r'/\*(.|\n)*?\*/'
-	t.lexer.lineno += t.value.count('\n')
+  r'/\*(.|\n)*?\*/'
+  t.lexer.lineno += t.value.count('\n')
 
 # Comentarios C++-style (//...)
 def t_CPPCOMMENT(t):
-	r'//.*\n'
-	t.lexer.lineno += 1
+  r'//.*\n'
+  t.lexer.lineno += 1
+
+# Comentario pascal
+def t_PASCOMMENT(t):
+  r'{(.|\n)*?}'
+  t.lexer.lineno += t.value.count('\n')
 
 # ----------------------------------------------------------------------
 # *** DEBE COMPLETAR : Agrege las regexps indicadas ***
@@ -360,39 +370,43 @@ def t_CPPCOMMENT(t):
 
 # Caracteres ilegales (manejo errores generico)
 def t_error(t):
-	error(t.lexer.lineno,"Caracter ilegal %r" % t.value[0])
-	t.lexer.skip(1)
+  error(t.lexer.lineno,"Caracter ilegal %r" % t.value[0])
+  t.lexer.skip(1)
 
 # Comentario C-style no terminado
 def t_COMMENT_UNTERM(t):
-	r'/\*[.\n]*(?!\*/)'
-	error(t.lexer.lineno,"Comentario no terminado")
+  r'(?:/\*[.\n]*(?!\*/))|(?:{[.\n]*(?!}))'
+  error(t.lexer.lineno,"Comentario no terminado")
+
 
 # Literal de cadena no terminada
 def t_STRING_UNTERM(t):
-	r'"["]+'
-	error(t.lexer.lineno,"Literal de cadena no terminada")
-	t.lexer.lineno += 1
+  r'".*(?!")'
+  error(t.lexer.lineno,"Literal de cadena no terminada")
+  t.lexer.lineno += 1
 
+def t_ILEGAL(t):
+	r'(?:.*\*/)|(?:.*})'
+	error(t.lexer.lineno,"Expresion ilegal")
 # ----------------------------------------------------------------------
 #                NO CAMBIE NADA DEBAJO DE ESTA PARTE
 # ----------------------------------------------------------------------
 def make_lexer():
-	'''
-	Funcion de utilidad para crear el objeto lexer
-	'''
-	return lex()
+  '''
+  Funcion de utilidad para crear el objeto lexer
+  '''
+  return lex()
 
 if __name__ == '__main__':
-	import sys
-	from errors import subscribe_errors
+  import sys
+  from errors import subscribe_errors
 
-	if len(sys.argv) != 2:
-		sys.stderr.write("Usage: %s filename\n" % sys.argv[0])
-		raise SystemExit(1)
+  if len(sys.argv) != 2:
+    sys.stderr.write("Usage: %s filename\n" % sys.argv[0])
+    raise SystemExit(1)
 
-	lexer = make_lexer()
-	with subscribe_errors(lambda msg: sys.stderr.write(msg+"\n")):
-		lexer.input(open(sys.argv[1]).read())
-		for tok in iter(lexer.token,None):
-			sys.stdout.write("%s\n" % tok)
+  lexer = make_lexer()
+  with subscribe_errors(lambda msg: sys.stderr.write(msg+"\n")):
+    lexer.input(open(sys.argv[1]).read())
+    for tok in iter(lexer.token,None):
+      sys.stdout.write("%s\n" % tok)
