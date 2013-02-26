@@ -181,7 +181,7 @@ t_COLON     = r':'
 #
 # El valor debe ser convertido a un float de Python cuando se analice
 def t_FLOAT(t):
-  r'(?: (?:\d*\.\d+|\d+\.\d*)(?:[eE][-+]?\d+)?)|(?:\d+[eE][-+]?\d+)'
+  r'(?:(?:\d*\.\d+|\d+\.\d*)(?:[eE][-+]?\d+)?)|(?:\d+[eE][-+]?\d+)'
   t.value = float(t.value)               # Conversion a float de Python
   return t
 
@@ -229,26 +229,24 @@ def t_INTEGER(t):
 
 escapes_not_b = r'nrt\"'
 escapes = escapes_not_b + "b"
-def _replace_escape_codes(t):
-  r'''
-  *** SE DEBE IMPLEMENTAR ***
 
-  Reemplace todos los codigos de escape validos \.. en una cadena con
-  su codigo de caracter raw equivalente.
-  '''
+def _replace_escape_codes(t):
   newval = []
   ostring = iter(t.value)
   olen = len(t.value)
+  Nerr = True
   for c in ostring:
     if c=='"':
-      error("Fin de cadena prematuro")
-      t.lexer.skip(1)
+      error(t.lexer.lineno,"Fin de cadena prematuro")
+      Nerr = False
+      break
     elif c=='\\':
       c1 = ostring.next()
       #if c1 not in escapes_not_b:
-      if c1 not in escapes:
+
+      if c1 not in escapes :
         error(t.lexer.lineno,"Codigo secuencia escape mala '%s'" % (c+c1))
-        t.lexer.skip()
+        Nerr = False
         break
       else:
         if c1=='n':
@@ -261,9 +259,20 @@ def _replace_escape_codes(t):
           c='\\'
         elif c1=='"':
           c='"'
+        elif c1=="b":
+        	b = ostring.next()+ostring.next()
+        	if (str.isdigit(b[0]) or (str.lower(b[0]) >= 'a' and str.lower(b[0]) <= 'f')) and (str.isdigit(b[1]) or (str.lower(b[1]) >= 'a' and str.lower(b[1]) <= 'f')):
+        		c1 = '\\b'
+        		c = c1+b
+        	else:
+        		error(t.lexer.lineno,"Codigo secuencia escape mala '%s'" % (c+c1))
+        		Nerr = False
+        		break
     newval.append(c)
   else:
     t.value = ''.join(newval)
+  if Nerr :
+  	return t
 
 def t_STRING(t):
   r'".*"'
@@ -388,6 +397,8 @@ def t_STRING_UNTERM(t):
 def t_ILEGAL(t):
 	r'(?:.*\*/)|(?:.*})'
 	error(t.lexer.lineno,"Expresion ilegal")
+
+
 # ----------------------------------------------------------------------
 #                NO CAMBIE NADA DEBAJO DE ESTA PARTE
 # ----------------------------------------------------------------------
