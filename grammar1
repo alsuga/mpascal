@@ -1,0 +1,209 @@
+#Definicino de programa
+program : funtion* program-begin 
+		;
+
+#Definicion de un inicio estandar
+program_begin : main_funtion
+			  ;
+
+#Definicion de funcion
+funtion : 'fun' identifier '('param-list')', locals BEGIN statements-sequence END';'
+	| empty
+	;
+
+#Definicion de funcion main
+main-funtion : 'fun' 'main' '('param-list')', locals BEGIN statements-sequence END';'
+			  ;
+
+#Argumentos de decisión para if y while
+param-list : identifier ':' datatype (','identifier ':' datatype)*
+	  | empty		  
+	  ;
+
+#Definicion de variables locales
+locals : ( identifier  ':' datatype';' )+
+	   | empty 
+	   ;
+
+
+
+#===========================================================
+#DEFINICION FORMALES DE LOS DIFERENTES ESTADOS SOPORTADOS
+#===========================================================
+
+#Deficion de una secuencia de estados
+statements-sequence : (statement';')* statement
+					;
+
+#Definicion de la composicion interna de una funcion
+statements : simple-statement
+		   | complex-statement
+		   ;	
+
+#Defincino dentro del while
+whiledef-statements : statement
+					| conditional-while-statement
+					;
+
+
+#Condicionales para los  cilos while
+conditional-while-statement : if-while-statement
+					 		;
+
+#Condicional puro para el while
+if-while-statement : 'if' '('expresion')' 'then' whiledef-statement break? ('else' whiledef-statement break?)?
+
+
+
+#Definicion de una composicion simple
+simple-statement : assign-statement 
+				 | return-statement 
+				 | funtion-call
+				 ;
+
+#Definicion de una composicion compuesta
+complex-statement : conditional-statement 
+				  | compound-statement 
+				  | loop-statement 
+				  | output-statement
+				  ;
+
+#Deficion de asignamiento
+assign-statement : variable ':=' (const | variable | function-call | expresion | input-statement)';'
+				 ;
+
+
+#Definicion entrada estandar
+input-statement 'print''('(variable | const | funtion-call | expresion | string) ')'';'
+
+#Definicion de salida estandar
+output-statement : 'write''('variable')'';'
+
+#Definicion de llamado una funcion
+funtion-call-statement : function-identifier '('funtion-call-parameters')'
+
+#Definicion de procesimiento
+return-statement : 'return' (const | variable | expresion)';'
+				 ;
+
+#definicion de una expresion condicional
+conditional-statement : if-statement
+					  ;
+
+#Definicion de una expresion compuesta
+compund-statement : 'begin' statement-sequence 'end'
+				  ;
+
+
+#Definicion del ciclos 
+loop-statement : while-statement
+			   ;
+
+#Definicion de if
+if-statement : 'if' '('expresion')' 'then' statement ('else' statement)?
+			 ;
+
+#Definicion de whie
+while-statement : 'while' '('expresion')' 'do' (statement | 'break')
+				;
+
+#Definicion de una expresion (simple o compuesta)
+expresion : simple-expresion (comparative-operator simple-expresion)?
+		  ;
+
+
+#Expresion simple
+simple-expresion : value (add-operator value)?
+				 ;
+
+#Valor
+value : const 
+	  | variable
+	  | logic
+	  | string 
+	  | funtion-designation
+	  | '('expresion')'
+	  ;
+
+
+
+#===========================================================
+#DEFINICION ESTADOS INTERMEDIOS
+#===========================================================
+
+
+#Definicion de contante
+const : ((sign)? constant-identifier | (sign)? number | string)
+	  ;
+
+#definicino del identificador de una constante 
+contant-identifier : identifier
+				   ;
+
+#Definicion de variable 
+variable : identifier
+		 ;
+
+#Tipo string
+string : '"'charapters(charapters)*'"'
+	   ;
+
+#Definicion de identificador
+identifier: charapter (charapter | number | spaces)*
+		  ;
+
+#Definicion de numero
+number : integer-number 
+	   | float-number
+	   ;
+
+#Definicion de entero
+integer-number : digit (digit)*
+			   ;
+
+float-number : integer-number '.' integer-number ((e | E) sign digit)?
+			 ;
+
+#Identificador de funciones
+funtion-identifier : identifier
+				   ;
+
+#Terminos enviables en una funcion
+funtion-call-parameters: (identifier | number | string | logic) 
+					     (','(identifier | number | string | logic))*
+					   ;
+#===========================================================
+#DEFINICION ESTADOS TERMINALES
+#===========================================================
+
+#Operadores logicos
+logic : 'true' | 'false' | 'TRUE' | 'FALSE'
+	  ;
+
+
+#Caracteres soportados
+charapters : [A-Za-z_(^")]
+		   ;
+
+#Espacio y saltos
+spaces : ('\n' | '\t' | '\s' |)
+	   ;
+
+#Definicion de digito
+digit : '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' 
+	   ; 
+
+#Signo
+sign : '+' | '-'
+	 ;
+
+#Adicionar operadores
+add-operator : '+' | '-' | '*' | '/' | 'and' | 'or' 
+			 ;
+
+#Operadores comparativos
+comparative-operator : '<' | '>' | '<=' | '>=' | '!=' | '==' 
+					 ;
+
+
+
