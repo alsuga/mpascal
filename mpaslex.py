@@ -234,11 +234,11 @@ def _replace_escape_codes(t):
   newval = []
   ostring = iter(t.value)
   olen = len(t.value)
-  Nerr = True
+  Nerr = False
   for c in ostring:
     if c=='"':
       error(t.lexer.lineno,"Fin de cadena prematuro")
-      Nerr = False
+      Nerr = True
       break
     elif c=='\\':
       c1 = ostring.next()
@@ -246,7 +246,7 @@ def _replace_escape_codes(t):
 
       if c1 not in escapes :
         error(t.lexer.lineno,"Codigo secuencia escape mala '%s'" % (c+c1))
-        Nerr = False
+        Nerr = True
         break
       else:
         if c1=='n':
@@ -266,21 +266,23 @@ def _replace_escape_codes(t):
         		c = c1+b
         	else:
         		error(t.lexer.lineno,"Codigo secuencia escape mala '%s'" % (c+c1))
-        		Nerr = False
+        		Nerr = True
         		break
     newval.append(c)
-  else:
-    t.value = ''.join(newval)
+  
+  t.value = ''.join(newval)
+
   if Nerr :
+  	t.lexer.skip(len(t.value))
+  else:
   	return t
 
 def t_STRING(t):
-  r'".*"'
+  r'".*?"'
   # Convierta t.value a una cadena con codigo de escape reemplazado por valor actual.
   t.value = t.value[1:-1]
   _replace_escape_codes(t)    # Debe implementar arriba
   return t
-
 
 
 def t_BOOLEAN(t):
@@ -363,7 +365,7 @@ def t_COMMENT(t):
 
 # Comentarios C++-style (//...)
 def t_CPPCOMMENT(t):
-  r'//.*\n'
+  r'//.*?\n'
   t.lexer.lineno += 1
 
 # Comentario pascal
@@ -385,7 +387,8 @@ def t_error(t):
 # Comentario C-style no terminado
 def t_COMMENT_UNTERM(t):
   r'(?:/\*[.\n]*(?!\*/))|(?:{[.\n]*(?!}))'
-  error(t.lexer.lineno,"Comentario no terminado")
+  error(t.lexer.lineno, "Comentario no terminado")
+  exit(0)
 
 
 # Literal de cadena no terminada
@@ -393,10 +396,12 @@ def t_STRING_UNTERM(t):
   r'".*(?!")'
   error(t.lexer.lineno,"Literal de cadena no terminada")
   t.lexer.lineno += 1
+  t.lexer.skip(1)
 
-def t_ILEGAL(t):
-	r'(?:.*\*/)|(?:.*})'
-	error(t.lexer.lineno,"Expresion ilegal")
+#def t_ILEGAL(t):
+#	r'(?:.*\*/)|(?:.*})'
+#	error(t.lexer.lineno,"Expresion ilegal")
+#	t.lexer.skip(len(t.value))
 
 
 # ----------------------------------------------------------------------
