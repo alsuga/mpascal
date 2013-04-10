@@ -145,6 +145,63 @@ class ExprList(AST):
 class Empty(AST):
 	_fields = []
 
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<< ACOMODAR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+'''
+class Funcdecl(AST):
+	_field = ['identifier','param_list', 'statements_sequence']#No incluir locals aqui pq no se va a tomar 
+	
+
+class Param_list(AST):
+	_field = ['identifier', 'datatype']
+
+class Locals(AST):
+	_field = ['identifier', 'datatype']
+
+class Statements_sequence(AST):
+	_field = ['statement']
+
+class Statement(AST):
+	_field = ['simple_statement','complex_statement']
+
+class Simple_statement(AST):
+	_field = ['assign_statement', 'return_statement', 'funtion_call']
+
+class Complex_statement(AST):
+	_field = ['conditional_statement', 'compound_statement', 'loop_statement', 'output_statement']
+
+class Assign_statement(AST):
+	_field = ['variable', 'const', 'function_call', 'expression', 'input_statement'] 
+
+class Output_statement(AST):
+	_field = ['variable', 'const', 'function_call', 'expression', 'string'] 
+
+class Input_statement(AST):
+	_field = ['variable', 'const', 'function_call', 'expression', 'string'] 
+
+class Funtion_call(AST):
+	_field = ['function_identifier', 'function_call_parameters']
+
+class Return_statement(AST):
+	_field = ['const', 'variable', 'expression']
+
+class Conditional_statement(AST):
+	_field = ['if_statement']
+	
+class Compound_statement(AST):
+	_field = ['statements_sequence']
+
+class Loop_statement(AST):
+	_field = ['while_statement']
+
+class If_statement(AST):
+	_field = ['expression', 'statement']
+
+class While_statement(AST):
+	_field = ['expression', 'statement']
+
+'''
+#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FIN ACOMODAR>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
 # Usted deberá añadir mas nodos aquí.  Algunos nodos sugeridos son
 # BinaryOperator, UnaryOperator, ConstDeclaration, VarDeclaration, 
