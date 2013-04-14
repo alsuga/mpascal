@@ -116,16 +116,16 @@ from ply.lex import lex
 
 tokens = [
   # keywords
-  'ID', 'CONST', 'VAR', 'PRINT', 'FUNC', 'EXTERN',
+  'ID', 'PRINT', 'FUNC', 
   'BEGIN', 'THEN', 'END',
 
   # Control flow
-  'IF', 'ELSE', 'WHILE',
+  'IF', 'ELSE', 'WHILE', 'BREAK',
 
   # Operators and delimiters
   'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
   'ASSIGN', 'SEMI', 'LPAREN', 'RPAREN', 'COMMA',
-  'LBRACKET', 'RBRACKET', 'COLON',
+  'COLON',
 
   # Boolean operators
   'LT', 'LE', 'GT', 'GE', 'LAND', 'LOR', 'LNOT',
@@ -156,8 +156,6 @@ t_ASSIGN    = r':='
 t_SEMI      = r';'
 t_LPAREN    = r'\('
 t_RPAREN    = r'\)'
-t_LBRACKET  = r'\['
-t_RBRACKET  = r'\]'
 t_COMMA     = r','
 t_LT        = r'<'
 t_LE        = r'<='
@@ -312,14 +310,14 @@ reserved = {
   'if':'IF',
   'else':'ELSE',
   'while':'WHILE',
-  'var':'VAR',
-  'const':'CONST',
+#  'var':'VAR',
+#  'const':'CONST',
   'func':'FUNC',
-  'extern':'EXTERN',
   'print':'PRINT',
   'begin':'BEGIN',
   'end':'END',
   'then':'THEN',
+  'break' : 'BREAK',
 }
 
 operators = {
@@ -333,8 +331,6 @@ operators = {
   r')' : "RPAREN",
   r',' : "COMMA",
   r':' : "COLON",
-  r'[' : "LBRACKET",
-  r']' : "RBRACKET",
   r'<' : "LT",
   r'<=' : "LE",
   r'==' : "EQ",
@@ -402,7 +398,6 @@ def t_STRING_UNTERM(t):
 #	r'(?:.*\*/)|(?:.*})'
 #	error(t.lexer.lineno,"Expresion ilegal")
 #	t.lexer.skip(len(t.value))
-
 
 # ----------------------------------------------------------------------
 #                NO CAMBIE NADA DEBAJO DE ESTA PARTE

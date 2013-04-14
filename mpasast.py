@@ -59,11 +59,99 @@ def validate_fields(**fields):
 
 # Unos pocos nodos ejemplos
 
-class PrintStatement(AST):
+class Program(AST):
+	_fields = ['function']
+
+	def append(self, e):
+		self.program.append(e)
+
+
+@validate_fields(statements=list)
+class Statements(AST):
+	_fields = ['statement']
+
+	def append(self,e):
+		self.statements.append(e)
+
+class St(AST):
+	_fields = ['statement']
+
+
+class Statement(AST):
+	_fields = ['assign', 'print', 'if', 'if_else' ,'while','break']
+
+
+class ConstDeclaration(AST):
+	_fields = ['id', 'typename']
+
+
+class Locals(AST):
+	_fields = ['id', 'typename']
+
+
+class Funcdecl(AST):
+	_fields = ['id','parameters', 'locals', 'statements']
+
+
+@validate_fields(param_decls=list)
+class Parameters(AST):
+	_fields = ['param_declaration']
+
+	def append(self,e):
+		self.param_decls.append(e)
+
+
+class Parameters_Declaration(AST):
+	_fields = ['id', 'typename']
+
+
+class Assign(AST):
+	_fields = ['id', 'value']
+
+
+class Print(AST):
 	'''
 	print expression ;
 	'''
-	_fields = ['expr']
+	_fields = ['expression']
+
+
+#class Expression(AST):
+#	_fields = []
+
+	def append(self, e):
+		self.expressions.append(e)
+
+class UnaryOp(AST):
+	_fields = ['op', 'right']
+
+class BinaryOp(AST):
+	_fields = ['op', 'left', 'right']
+
+class Relation(AST):
+	_fields = ['op', 'left', 'right']
+
+class Group(AST):
+	_fields = ['expression']
+
+class FunCall(AST):
+	_fields = ['id', 'parameters']
+
+class If(AST):
+	_fields = ['cond', 'then_b', 'else_b']
+
+
+class WhileStatement(AST):
+	_fields = ['cond', 'body']
+
+class Expression_id(AST):
+	_fields = ['id']
+
+class Expression_Literal(AST):
+	_fields = ['value']
+
+class ExprList(AST):
+	_fields = ['expressions']	
 
 class Literal(AST):
 	'''
@@ -71,136 +159,13 @@ class Literal(AST):
 	'''
 	_fields = ['value']
 
-class Program(AST):
-	_fields = ['program']
+class Typename(AST):
+	_fields = ['id']
 
-@validate_fields(statements=list)
-class Statements(AST):
-	_fields = ['statements']
-
-	def append(self,e):
-		self.statements.append(e)
-	
-class Statement(AST):
-	_fields = ['statement']
-
-class Extern(AST):
-	_fields = ['func_prototype']
-
-class FuncPrototype(AST):
-	_fields = ['id', 'params', 'typename']
-
-@validate_fields(param_decls=list)
-class Parameters(AST):
-	_fields = ['param_decls']
-
-	def append(self,e):
-		self.param_decls.append(e)
-
-class ParamDecl(AST):
-	_fields = ['id', 'typename']
-
-class AssignmentStatement(AST):
-	_fields = ['location', 'value']
-
-class ConstDeclaration(AST):
-	_fields = ['id', 'value']
-
-class VarDeclaration(AST):
-	_fields = ['id', 'typename', 'value']
-
-class IfStatement(AST):
-	_fields = ['condition', 'then_b', 'else_b']
-
-class WhileStatement(AST):
-	_fields = ['condition', 'body']
-
-class LoadLocation(AST):
-	_fields = ['name']
-
-class StoreVar(AST):
-	_fields = ['name']
-
-class UnaryOp(AST):
-	_fields = ['op', 'left']
-
-class BinaryOp(AST):
-	_fields = ['op', 'left', 'right']
-
-class RelationalOp(AST):
-	_fields = ['op', 'left', 'right']
-	
-class Group(AST):
-	_fields = ['expression']
-
-class FunCall(AST):
-	_fields = ['id', 'params']
-
-class ExprList(AST):
-	_fields = ['expressions']
-
-	def append(self, e):
-		self.expressions.append(e)
 
 class Empty(AST):
 	_fields = []
 
-# <<<<<<<<<<<<<<<<<<<<<<<<<<<< ACOMODAR >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-'''
-class Funcdecl(AST):
-	_field = ['identifier','param_list', 'statements_sequence']#No incluir locals aqui pq no se va a tomar 
-	
-
-class Param_list(AST):
-	_field = ['identifier', 'datatype']
-
-class Locals(AST):
-	_field = ['identifier', 'datatype']
-
-class Statements_sequence(AST):
-	_field = ['statement']
-
-class Statement(AST):
-	_field = ['simple_statement','complex_statement']
-
-class Simple_statement(AST):
-	_field = ['assign_statement', 'return_statement', 'funtion_call']
-
-class Complex_statement(AST):
-	_field = ['conditional_statement', 'compound_statement', 'loop_statement', 'output_statement']
-
-class Assign_statement(AST):
-	_field = ['variable', 'const', 'function_call', 'expression', 'input_statement'] 
-
-class Output_statement(AST):
-	_field = ['variable', 'const', 'function_call', 'expression', 'string'] 
-
-class Input_statement(AST):
-	_field = ['variable', 'const', 'function_call', 'expression', 'string'] 
-
-class Funtion_call(AST):
-	_field = ['function_identifier', 'function_call_parameters']
-
-class Return_statement(AST):
-	_field = ['const', 'variable', 'expression']
-
-class Conditional_statement(AST):
-	_field = ['if_statement']
-	
-class Compound_statement(AST):
-	_field = ['statements_sequence']
-
-class Loop_statement(AST):
-	_field = ['while_statement']
-
-class If_statement(AST):
-	_field = ['expression', 'statement']
-
-class While_statement(AST):
-	_field = ['expression', 'statement']
-
-'''
-#<<<<<<<<<<<<<<<<<<<<<<<<<<<<<FIN ACOMODAR>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 # Usted deberá añadir mas nodos aquí.  Algunos nodos sugeridos son

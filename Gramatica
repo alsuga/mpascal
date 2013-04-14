@@ -1,0 +1,74 @@
+program : program function
+		| empty
+
+function : FUNC ID LPAREN parameters RPAREN  locals BEGIN statements END
+
+parameters : parameters COMMA param_dec
+		 | param_dec
+		 | empty
+
+parama_dec : ID COLON typename
+
+locals : locals ID COLON typename SEMI 
+		| empty
+
+statement : assign
+		| print_statement
+		| if_statement
+		| if_else _statement
+		| while_statement
+		| empty
+
+statements : statement 
+		| BEGIN st END
+
+st : st statement
+	|empty
+
+assign : ID ASSIGN expression SEMI 
+
+print : PRINT expression SEMI
+
+if : IF cond THEN statements 
+
+if_else :  IF cond THEN statements ELSE statements
+
+while : WHILE cond statements
+
+wstatements : (statement | BREAK) 
+						| BEGIN wst END 
+
+wst : wst 	(statement | BREAK)
+	| empty
+
+expression : cond 
+		| mexpre
+
+numexp : numexp PLUS num
+	   | numexp MINUS num
+	   | numexp TIMES num
+	   | numexp / num
+	   | empty
+
+comp : numexp < num
+	 | numexp > num
+	 | numexp >= num
+	 | numexp <= num
+	 | numexp = num
+	 | empty
+
+cond : cond AND bexp
+	 | cond OR bexp 
+	 | cond NOT bexp
+	 | empty
+	 | bexp
+
+num : ID | literal
+
+bexp : ID 
+	 | literal 
+	 | comp
+
+
+
+
