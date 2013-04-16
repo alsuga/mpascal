@@ -1,6 +1,6 @@
 # mpasast.py
 # -*- coding: utf-8 -*-
-#import pydot
+import pydot
 '''
 Objetos Arbol de Sintaxis Abstracto (AST - Abstract Syntax Tree).
 
@@ -307,19 +307,21 @@ def flatten(top):
 	return d.nodes
 
 
-class DotVisitor("AST"):
+class DotVisitor():
     graph = None
-    def __init__(self,AST):
-        self.graph = pydot.Dot(AST, graph_type='graph')
+    num = 1
+    def __init__(self):
+        self.graph = pydot.Dot("AST", graph_type='digraph')
 
     def visit(self,node):
-        vertice =pydot.Node("%s" % node.__class__.__name__ , style="filled", fillcolor="green")
+        vertice =pydot.Node("%s" % node.__class__.__name__ + " " + str(self.num) , style="filled", fillcolor="green")
+        self.num += 1
         for field in getattr(node,"_fields"):
             value = getattr(node,field)           
             if isinstance(value,list):
-                for item in value:
-                    if isinstance(item,AST):
-                        nvertice = self.visit(item)
+                for elemento in value:
+                    if isinstance(elemento,AST):
+                        nvertice = self.visit(elemento)
                         self.graph.add_edge(pydot.Edge(vertice, nvertice))                                         
             elif isinstance(value,AST):
                 nvertice = self.visit(value)

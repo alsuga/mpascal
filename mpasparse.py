@@ -319,7 +319,6 @@ def dump_tree(node, indent = ""):
 
     if(node.__class__.__name__ != "str" and node.__class__.__name__ != "list"):
         print "%s%s  %s" % (indent, node.__class__.__name__, datatype)
-
     indent = indent.replace("-"," ")
     indent = indent.replace("+"," ")
     if hasattr(node,'_fields'):
@@ -348,11 +347,11 @@ if __name__ == '__main__':
     parser = make_parser()
     with subscribe_errors(lambda msg: sys.stdout.write(msg+"\n")):
         program = parser.parse(open(sys.argv[1]).read())
-    dot = DotVisitor(program)
-    dot.visit()
+    dot = DotVisitor()
+    dot.visit(program)
     dot.graph.write_png("grafo.png")
 
-    #dump_tree(program)
+    dump_tree(program)
     #for depth,node in flatten(program):
     #    dump_tree(node)
         #print("%s%s" % (" "*(4*depth),node.__class__.__name__))
