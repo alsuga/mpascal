@@ -69,7 +69,8 @@ def p_locals(p):
 
 def p_locals_1(p):
     '''
-    locals : empty
+    locals : local
+            | empty
     '''
     p[0] = p[1]
 
@@ -347,8 +348,11 @@ if __name__ == '__main__':
     parser = make_parser()
     with subscribe_errors(lambda msg: sys.stdout.write(msg+"\n")):
         program = parser.parse(open(sys.argv[1]).read())
+    dot = DotVisitor(program)
+    dot.visit()
+    dot.graph.write_png("grafo.png")
 
-    dump_tree(program)
+    #dump_tree(program)
     #for depth,node in flatten(program):
     #    dump_tree(node)
         #print("%s%s" % (" "*(4*depth),node.__class__.__name__))

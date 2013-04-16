@@ -307,45 +307,24 @@ def flatten(top):
 	return d.nodes
 
 
-class DotVisitor():
+class DotVisitor("AST"):
     graph = None
-    def __init__(self):
-        self.graph = pydot.Dot('AST', graph_type='digraph')
-        self.id=0
-    def ID(self):
-        self.id+=1
-        return self.id
-        #return "n%d" %self.id
-    
-    def visit (self, node):
-        if(node._leaf):
-            newname=self.visit_leaf(node)
-            
-        else:
-            newname=self.visit_non_leaf(node)
-        self.graph.add_node(newname)
-        return newname
+    def __init__(self,AST):
+        self.graph = pydot.Dot(AST, graph_type='graph')
 
-    def visit_non_leaf(self,node):
-        string= "Node %d %s" % (self.ID(), node.__class__.__name__)
-        name=pydot.Node(string,shape='box3d', style="filled", fillcolor="#0066ff")
+    def visit(self,node):
+        vertice =pydot.Node("%s" % node.__class__.__name__ , style="filled", fillcolor="green")
         for field in getattr(node,"_fields"):
-            value = getattr(node,field,None)           
+            value = getattr(node,field)           
             if isinstance(value,list):
-                newvalues = []
                 for item in value:
                     if isinstance(item,AST):
-                        newname = self.visit(item)
-                        self.graph.add_edge(pydot.Edge(name, newname))
-                        
-                                                      
+                        nvertice = self.visit(item)
+                        self.graph.add_edge(pydot.Edge(vertice, nvertice))                                         
             elif isinstance(value,AST):
-                newname = self.visit(value)
-                self.graph.add_edge(pydot.Edge(name, newname))
-        return name            
+                nvertice = self.visit(value)
+                self.graph.add_edge(pydot.Edge(vertice, nvertice))
+        self.graph.add_node(vertice)
+        return vertice          
         
-
-    def visit_leaf(self, node):
-        string = "Leaf %d %s" % (self.ID(), node.__class__.__name__)
-        return pydot.Node(string, shape='box3d',style="filled", fillcolor="#9ACD32")
 
