@@ -9,24 +9,30 @@ precedence = (
     ('nonassoc', 'LT', 'LE', 'EQ', 'GT', 'GE', 'NE'),
     ('left', 'PLUS', "MINUS"),
     ('left', "TIMES", "DIVIDE"),
-    ('right', 'UNARY'),  
+    ('right', 'UNARY'),
+    ('right', 'ELSE'),
 )
 
-
 def p_program(p):
-    '''program : program function 
-                | empty
     '''
-    p[0] = p[1]
-    p[0].append(p[2])
+    program : program function
+            | function 
+    '''
+    if len(p) == 3 :
+        p[0] = Program([p[1]])
+        p[0].append(p[2])
+    else:
+        p[0] = Program([p[1]])
 
 def p_statements(p):
     '''
     statements : statement
                | BEGIN st END
     '''
-    p[0] = p[1]
-    p[0] = p[2]
+    if len(p) == 2 :
+        p[0] = p[1]
+    else:
+        p[0] = p[2]
 
 def p_st(p):
     '''
@@ -36,8 +42,6 @@ def p_st(p):
     p[0] = p[1]
     p[0].append(p[2])
 
-
-
 def p_statement(p):
     '''
     statement : assign
@@ -46,32 +50,52 @@ def p_statement(p):
             | if_else
             | while
             | BREAK
+            | read
     '''
     p[0] = Statement(p[1])
 
 #def p_const_declaration(p):
 #    '''
-#    const_declaration : CONST ID ASSIGN expression SEMI
+#    const_declaration : CONST id ASSIGN expression SEMI
 #    '''
 #    p[0] = ConstDeclaration(p[2],p[4])
- 
+
 def p_locals(p):
     '''
-    locals : locals ID COLON typename SEMI
-            | empty
+    locals : locals local
     '''
-    p[0] = VarDeclaration(p[2], p[3], None, lineno=p.lineno(2))
+    p[0] = Locals([p[1]])
+    p[0].append(p[2])
 
+def p_locals_1(p):
+    '''
+    locals : empty
+    '''
+    p[0] = p[1]
+
+def p_local(p):
+    '''
+    local : id COLON typename SEMI
+    '''
+    p[0] = Local(p[1], p[3])
+
+def p_local_2(p):
+    '''
+    local : id COLON typename LBRACKET literal RBRACKET SEMI 
+    '''
+    p[0] = Local_vec(p[1], p[3], p[5])
 
 def p_fundecl(p):
-    '''function : FUNC ID LPAREN parameters RPAREN locals BEGIN statements END'''
-    p[0] = Funcdecl(ID = p[2], param_list = p[4], locals = p[6], statements = p[8]) 
+    '''
+    function : FUNC id LPAREN parameters RPAREN locals BEGIN statements END
+    '''
+    p[0] = Funcdecl(p[2], p[4], p[6], p[8]) 
 
 def p_parameters(p):
     '''
     parameters : parameters COMMA parm_declaration
     '''
-    p[0] = p[1]
+    p[0] = Parameters([p[1]])
     p[0].append(p[3])
 
 def p_parameters_1(p):
@@ -79,34 +103,44 @@ def p_parameters_1(p):
     parameters : parm_declaration
                | empty
     '''
-    p[0] = Parameters([p[1]])
+    p[0] = p[1]
 
 def p_parm_declaration(p):
     '''
-    parm_declaration : ID typename
+    parm_declaration : id COLON typename
     '''
-    p[0] = ParamDecl(p[1], p[2])
+    p[0] = Parameters_Declaration(p[1], p[3])
+
+def p_parm_declaration_1(p):
+    '''
+    parm_declaration : id COLON typename LBRACKET literal RBRACKET
+    '''
+    p[0] = Parameters_Declaration_vec(p[1], p[3], p[5])
 
 def p_assign(p):
     '''
-    assign : ID ASSIGN expression SEMI 
+    assign : id ASSIGN expression SEMI 
     '''
-    p[0] = AssignmentStatement(p[1], p[3])
+    p[0] = Assignment(p[1], p[3])
 
 def p_print(p):
     '''
-    print : PRINT expression SEMI
+    print : PRINT LPAREN expression RPAREN SEMI
     '''
-    #import pydb; pydb.debugger()
-    p[0] = PrintStatement(p[2])
+    p[0] = Print(p[3])
 
+def p_read(p):
+    '''
+    read : READ LPAREN id RPAREN SEMI
+    '''
+    p[0] = Read(p[3])
 
 def p_expression_unary(p):
     '''
     expression :  PLUS expression %prec UNARY
                 |  MINUS expression %prec UNARY
     '''
-    p[0] = UnaryOp(p[1], p[2], lineno=p.lineno(1))
+    p[0] = UnaryOp(p[1], p[2])
 
 
 def p_expression_group(p):
@@ -117,31 +151,31 @@ def p_expression_group(p):
 
 def p_expression_funcall(p):
     '''
-    expression :  ID LPAREN exprlist RPAREN 
-                | ID LPAREN RPAREN
+    expression :  id LPAREN exprlist RPAREN 
+                | id LPAREN RPAREN
     '''
     if len(p == 5):
-        p[0] = FunCall(p[1], [2])
+        p[0] = FunCall(p[1], p[3])
     else:
-        p[0] = FunCall(p[1],[])
+        p[0] = FunCall_v(p[1])
 
 def p_if(p):
     '''
-    if : IF cond THEN statements
+    if : IF cond THEN statements %prec ELSE
     '''
-    p[0] = IfStatement(p[2], p[4], None)
+    p[0] = IfStatement(p[2], p[4])
 
 def p_if_else(p):
     '''
     if_else :  IF cond THEN statements ELSE statements
     '''
-    p[0] = IfStatement(p[2], p[4], p[8])
+    p[0] = If_elseStatement(p[2], p[4], p[6])
 
 def p_while(p):
     '''
     while : WHILE cond statements
     '''
-    p[0] = WhileStatement(p[2], p[4])
+    p[0] = WhileStatement(p[2], p[3])
 
 def p_expression(p):
     '''
@@ -157,7 +191,7 @@ def p_expression(p):
             p[0] = BinaryOp("-",p[1],p[3])
         elif (p[2] == '*' ):
             p[0] = BinaryOp("*",p[1],p[3])
-        elif (p[2] == '/'):
+        else :
             p[0] = BinaryOp("/",p[1],p[3])
 
 def p_comp(p):
@@ -200,18 +234,23 @@ def p_cond(p):
 
 def p_cond_1(p):
     '''
-    cond : ID
+    cond : id
           | literal
     ''' 
-
+    p[0] = p[1]
 
 def p_expression_1(p):
     '''
-    expression : ID 
+    expression : id 
                 | literal
     '''
     p[0] = p[1]
 
+def p_expression_2(p):
+    '''
+    expression : typename LPAREN id RPAREN 
+    '''
+    p[0] = Cast(p[1],p[3])
 
 def p_exprlist(p):
     '''
@@ -233,14 +272,25 @@ def p_literal(p):
             | STRING
             | BOOLEAN
     '''
-    p[0] = Literal(p[1],lineno=p.lineno(1))
-
+    p[0] = Literal(p[1])
 
 def p_typename(p):
     '''
-    typename : ID
+    typename : TYPENAME
     '''
-    p[0] = p[1]
+    p[0] = Typename(p[1])
+
+def p_id(p):
+    '''
+    id : ID
+    '''
+    p[0] = Id(p[1])
+
+def p_id_2(p):
+    '''
+    id : ID LBRACKET expression RBRACKET
+    '''
+    p[0] = Id_vec(p[1],p[3])
 
 def p_empty(p):
     '''
@@ -259,6 +309,36 @@ def make_parser():
     parser = yacc.yacc()
     return parser
 
+def dump_tree(node, indent = ""):
+    #print node
+    if not hasattr(node, "datatype"):
+        datatype = ""
+    else:
+        datatype = node.datatype
+
+    if(node.__class__.__name__ != "str" and node.__class__.__name__ != "list"):
+        print "%s%s  %s" % (indent, node.__class__.__name__, datatype)
+
+    indent = indent.replace("-"," ")
+    indent = indent.replace("+"," ")
+    if hasattr(node,'_fields'):
+        mio = node._fields
+    else:
+        mio = node
+    if(isinstance(mio,list)):
+        for i in range(len(mio)):
+            if(isinstance(mio[i],str) ):
+                c = getattr(node,mio[i])
+            else:
+             c = mio[i]
+            if i == len(mio)-1:
+                dump_tree(c, indent + "  +-- ")
+            else:
+                dump_tree(c, indent + "  |-- ")
+    else:
+        print indent, mio
+
+
 if __name__ == '__main__':
     import mpaslex
     import sys
@@ -266,7 +346,9 @@ if __name__ == '__main__':
     lexer = mpaslex.make_lexer()
     parser = make_parser()
     with subscribe_errors(lambda msg: sys.stdout.write(msg+"\n")):
-        program = parser.parse(open(sys.argv[1]).read(),debug = 1)
+        program = parser.parse(open(sys.argv[1]).read())
 
-    for depth,node in flatten(program):
-        print("%s%s" % (" "*(4*depth),node))
+    dump_tree(program)
+    #for depth,node in flatten(program):
+    #    dump_tree(node)
+        #print("%s%s" % (" "*(4*depth),node.__class__.__name__))

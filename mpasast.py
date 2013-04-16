@@ -1,5 +1,6 @@
 # mpasast.py
 # -*- coding: utf-8 -*-
+#import pydot
 '''
 Objetos Arbol de Sintaxis Abstracto (AST - Abstract Syntax Tree).
 
@@ -34,6 +35,7 @@ class AST(object):
 		for depth, node in flatten(self):
 			print("%s%s" % (" "*(4*depth),node))
 
+
 def validate_fields(**fields):
 	def validator(cls):
 		old_init = cls.__init__
@@ -59,68 +61,82 @@ def validate_fields(**fields):
 
 # Unos pocos nodos ejemplos
 
+@validate_fields(function=list)
 class Program(AST):
 	_fields = ['function']
 
 	def append(self, e):
-		self.program.append(e)
+		self.function.append(e)
 
 
 @validate_fields(statements=list)
 class Statements(AST):
-	_fields = ['statement']
+	_fields = ['statements']
 
 	def append(self,e):
 		self.statements.append(e)
 
 class St(AST):
-	_fields = ['statement']
-
+	_fields = ['sts']
+	def append(self,e):
+		self.sts.append(e)
 
 class Statement(AST):
-	_fields = ['assign', 'print', 'if', 'if_else' ,'while','break']
+	_fields = ['statement']
 
 
 class ConstDeclaration(AST):
 	_fields = ['id', 'typename']
 
+class Assignment(AST):
+	_field = ['id', 'expression']
 
+@validate_fields(locals=list)
 class Locals(AST):
+	_fields = ['locals']
+	def append(self,e):
+		self.locals.append(e)
+
+class Local(AST):
 	_fields = ['id', 'typename']
 
+class Local_vec(AST):
+	_fields = ['id', 'typename','size']
 
 class Funcdecl(AST):
 	_fields = ['id','parameters', 'locals', 'statements']
 
 
-@validate_fields(param_decls=list)
+@validate_fields(parameters=list)
 class Parameters(AST):
-	_fields = ['param_declaration']
-
+	_fields = ['parameters']
 	def append(self,e):
-		self.param_decls.append(e)
-
+		self.parameters.append(e)
 
 class Parameters_Declaration(AST):
 	_fields = ['id', 'typename']
 
 
-class Assign(AST):
+class Parameters_Declaration_vec(AST):
+	_fields = ['id', 'typename','size']
+
+#	def append(self,e):
+#		self.append(e)
+
+class Id(AST):
+	_fields = ['id']
+
+class Id_vec(AST):
+	_fields = ['id','pos']
+
+class Assignment(AST):
 	_fields = ['id', 'value']
 
-
 class Print(AST):
-	'''
-	print expression ;
-	'''
 	_fields = ['expression']
 
-
-#class Expression(AST):
-#	_fields = []
-
-	def append(self, e):
-		self.expressions.append(e)
+class Read(AST):
+	_fields = ['id']
 
 class UnaryOp(AST):
 	_fields = ['op', 'right']
@@ -135,20 +151,22 @@ class Group(AST):
 	_fields = ['expression']
 
 class FunCall(AST):
+	_fields = ['id']
+
+class FunCall_v(AST):
 	_fields = ['id', 'parameters']
 
-class If(AST):
-	_fields = ['cond', 'then_b', 'else_b']
+class IfStatement(AST):
+	_fields = ['cond', 'then_b']
 
+class If_elseStatement(AST):
+	_fields = ['cond', 'then_b', 'else_b']
 
 class WhileStatement(AST):
 	_fields = ['cond', 'body']
 
-class Expression_id(AST):
-	_fields = ['id']
-
-class Expression_Literal(AST):
-	_fields = ['value']
+class Cast(AST):
+	_fields = ['typename','id']
 
 class ExprList(AST):
 	_fields = ['expressions']	
@@ -287,3 +305,47 @@ def flatten(top):
 	d = Flattener()
 	d.visit(top)
 	return d.nodes
+
+
+class DotVisitor():
+    graph = None
+    def __init__(self):
+        self.graph = pydot.Dot('AST', graph_type='digraph')
+        self.id=0
+    def ID(self):
+        self.id+=1
+        return self.id
+        #return "n%d" %self.id
+    
+    def visit (self, node):
+        if(node._leaf):
+            newname=self.visit_leaf(node)
+            
+        else:
+            newname=self.visit_non_leaf(node)
+        self.graph.add_node(newname)
+        return newname
+
+    def visit_non_leaf(self,node):
+        string= "Node %d %s" % (self.ID(), node.__class__.__name__)
+        name=pydot.Node(string,shape='box3d', style="filled", fillcolor="#0066ff")
+        for field in getattr(node,"_fields"):
+            value = getattr(node,field,None)           
+            if isinstance(value,list):
+                newvalues = []
+                for item in value:
+                    if isinstance(item,AST):
+                        newname = self.visit(item)
+                        self.graph.add_edge(pydot.Edge(name, newname))
+                        
+                                                      
+            elif isinstance(value,AST):
+                newname = self.visit(value)
+                self.graph.add_edge(pydot.Edge(name, newname))
+        return name            
+        
+
+    def visit_leaf(self, node):
+        string = "Leaf %d %s" % (self.ID(), node.__class__.__name__)
+        return pydot.Node(string, shape='box3d',style="filled", fillcolor="#9ACD32")
+

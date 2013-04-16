@@ -117,7 +117,7 @@ from ply.lex import lex
 tokens = [
   # keywords
   'ID', 'PRINT', 'FUNC', 
-  'BEGIN', 'THEN', 'END',
+  'BEGIN', 'THEN', 'END','READ',
 
   # Control flow
   'IF', 'ELSE', 'WHILE', 'BREAK',
@@ -125,7 +125,7 @@ tokens = [
   # Operators and delimiters
   'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
   'ASSIGN', 'SEMI', 'LPAREN', 'RPAREN', 'COMMA',
-  'COLON',
+  'COLON','LBRACKET','RBRACKET',
 
   # Boolean operators
   'LT', 'LE', 'GT', 'GE', 'LAND', 'LOR', 'LNOT',
@@ -133,6 +133,9 @@ tokens = [
 
   # Literals
   'INTEGER', 'FLOAT', 'STRING', 'BOOLEAN',
+  
+  #tipos de dato
+  'TYPENAME',
 ]
 
 # ----------------------------------------------------------------------
@@ -157,6 +160,8 @@ t_SEMI      = r';'
 t_LPAREN    = r'\('
 t_RPAREN    = r'\)'
 t_COMMA     = r','
+t_LBRACKET  = r'\['
+t_RBRACKET  = r'\]'
 t_LT        = r'<'
 t_LE        = r'<='
 t_EQ        = r'=='
@@ -167,6 +172,10 @@ t_LAND      = r'and'
 t_LOR       = r'or'
 t_LNOT      = r'not'
 t_COLON     = r':'
+
+def t_TYPENAME(t):
+  r'\b(int|bool|float)\b'
+  return t
 # ----------------------------------------------------------------------
 # *** DEBE COMPLETAR : escriba las regexps y codigo adicional para ***
 #
@@ -310,7 +319,6 @@ reserved = {
   'if':'IF',
   'else':'ELSE',
   'while':'WHILE',
-#  'var':'VAR',
 #  'const':'CONST',
   'func':'FUNC',
   'print':'PRINT',
@@ -318,6 +326,7 @@ reserved = {
   'end':'END',
   'then':'THEN',
   'break' : 'BREAK',
+  'read' : 'READ',
 }
 
 operators = {
