@@ -19,8 +19,8 @@ def p_program(p):
             | function 
     '''
     if len(p) == 3 :
-        p[0] = Program([p[1]])
-        p[0].append(p[2])
+        p[1].append(p[2])
+        p[0] = p[1]
     else:
         p[0] = Program([p[1]])
 
@@ -42,7 +42,7 @@ def p_statements(p):
     '''
     statements : statement
     '''
-    p[0] = p[1]
+    p[0] = Statements([p[1]])
 
 # se quito st, entrando en la regla statements 
 
@@ -51,8 +51,8 @@ def p_statements_1(p):
     statements : statements statement
 
     '''
+    p[1].append(p[2])
     p[0] = p[1]
-    p[0].append(p[2])
 
 def p_statement(p):
     '''
@@ -61,10 +61,14 @@ def p_statement(p):
             | if
             | if_else
             | while
-            | BREAK
+            | BREAK SEMI
+            | SKIP SEMI
             | read
+            | write
+            | funcall SEMI
+            | return
     '''
-    p[0] = Statement(p[1])
+    p[0] = p[1]
 
 #def p_const_declaration(p):
 #    '''
@@ -76,8 +80,8 @@ def p_locals(p):
     '''
     locals : locals local
     '''
-    p[0] = Locals([p[1]])
-    p[0].append(p[2])
+    p[1].append(p[2])
+    p[0] = p[1]
 
 #se quito el empty, causaba problemas
 
@@ -85,7 +89,7 @@ def p_locals_1(p):
     '''
     locals : local
     '''
-    p[0] = p[1]
+    p[0] = Locals([p[1]])
 
 def p_local(p):
     '''
@@ -117,15 +121,15 @@ def p_parameters(p):
     '''
     parameters : parameters COMMA parm_declaration
     '''
-    p[0] = Parameters([p[1]])
-    p[0].append(p[3])
+    p[1].append(p[3])
+    p[0] = p[1]
 
 def p_parameters_1(p):
     '''
     parameters : parm_declaration
                | empty
     '''
-    p[0] = p[1]
+    p[0] = Parameters([p[1]])
 
 def p_parm_declaration(p):
     '''
@@ -147,9 +151,21 @@ def p_assign(p):
 
 def p_print(p):
     '''
-    print : PRINT LPAREN expression RPAREN SEMI
+    print : PRINT LPAREN literal RPAREN SEMI
     '''
     p[0] = Print(p[3])
+
+def p_write(p):
+    '''
+    write : WRITE LPAREN expression RPAREN SEMI
+    '''
+    p[0] = Write(p[3])
+
+def p_return(p):
+    '''
+    return : RETURN expression SEMI
+    '''
+    p[0] = Return(p[2])
 
 def p_read(p):
     '''
@@ -173,12 +189,15 @@ def p_expression_group(p):
 
 def p_expression_funcall(p):
     '''
-    expression :  id LPAREN exprlist RPAREN 
+    expression :  funcall
     '''
-    if len(p == 5):
-        p[0] = FunCall(p[1], p[3])
-    else:
-        p[0] = FunCall_v(p[1])
+    p[0] = p[1]
+
+def p_expression_funcall_1(p):
+    '''
+    funcall :  id LPAREN exprlist RPAREN 
+    '''
+    p[0] = FunCall(p[1], p[3])
 
 def p_if(p):
     '''
@@ -194,7 +213,7 @@ def p_if_else(p):
 
 def p_while(p):
     '''
-    while : WHILE cond st
+    while : WHILE cond DO st
     '''
     p[0] = WhileStatement(p[2], p[3])
 

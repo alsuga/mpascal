@@ -116,11 +116,11 @@ from ply.lex import lex
 
 tokens = [
   # keywords
-  'ID', 'PRINT', 'FUNC', 
-  'BEGIN', 'THEN', 'END','READ',
+  'ID', 'PRINT', 'FUNC', 'RETURN',
+  'BEGIN', 'THEN', 'END','READ','WRITE',
 
   # Control flow
-  'IF', 'ELSE', 'WHILE', 'BREAK',
+  'IF', 'ELSE', 'WHILE', 'BREAK', 'SKIP','DO',
 
   # Operators and delimiters
   'PLUS', 'MINUS', 'TIMES', 'DIVIDE',
@@ -134,7 +134,7 @@ tokens = [
   # Literals
   'INTEGER', 'FLOAT', 'STRING', 
   
-  #tipos de dato
+  # Datatype
   'TYPENAME',
 ]
 
@@ -327,6 +327,10 @@ reserved = {
   'then':'THEN',
   'break' : 'BREAK',
   'read' : 'READ',
+  'write' : 'WRITE',
+  'return' : 'RETURN',
+  'skip' : 'SKIP',
+  'do' : 'DO',
 }
 
 operators = {

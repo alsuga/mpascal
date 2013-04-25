@@ -80,10 +80,8 @@ class Statement(AST):
   _fields = ['statement']
 
 class ConstDeclaration(AST):
-  _fields = ['Id', 'typename']
+  _fields = ['id', 'typename']
 
-class Assignment(AST):
-  _field = ['Id', 'expression']
 
 @validate_fields(locals=list)
 class Locals(AST):
@@ -92,13 +90,13 @@ class Locals(AST):
     self.locals.append(e)
 
 class Local(AST):
-  _fields = ['Id', 'typename']
+  _fields = ['id', 'typename']
 
 class Local_vec(AST):
-  _fields = ['Id', 'typename','size']
+  _fields = ['id', 'typename','size']
 
 class Funcdecl(AST):
-  _fields = ['Id','parameters', 'locals', 'statements']
+  _fields = ['id','parameters', 'locals', 'statements']
 
 
 @validate_fields(parameters=list)
@@ -108,30 +106,36 @@ class Parameters(AST):
     self.parameters.append(e)
 
 class Parameters_Declaration(AST):
-  _fields = ['Id', 'typename']
+  _fields = ['id', 'typename']
 
 
 class Parameters_Declaration_vec(AST):
-  _fields = ['Id', 'typename','size']
+  _fields = ['id', 'typename','size']
 
 #  def append(self,e):
 #    self.append(e)
 
 class Id(AST):
-  _fields = ['id']
+  _fields = ['value']
 
 class Id_vec(AST):
-  _fields = ['id','pos']
+  _fields = ['value','pos']
 
 class Assignment(AST):
-  _fields = ['Id', 'value']
+  _fields = ['id', 'expression']
 
 class Print(AST):
+  _fields = ['liteal']
+
+class Write(AST):
   _fields = ['expression']
 
 class Read(AST):
-  _fields = ['Id']
+  _fields = ['id']
 
+class Return(AST):
+  _fields = ['expression']
+    
 class UnaryOp(AST):
   _fields = ['op', 'right']
 
@@ -145,10 +149,7 @@ class Group(AST):
   _fields = ['expression']
 
 class FunCall(AST):
-  _fields = ['Id']
-
-class FunCall_v(AST):
-  _fields = ['Id', 'parameters']
+  _fields = ['id', 'parameters']
 
 class IfStatement(AST):
   _fields = ['cond', 'then_b']
@@ -160,10 +161,14 @@ class WhileStatement(AST):
   _fields = ['cond', 'body']
 
 class Cast(AST):
-  _fields = ['typename','Id']
+  _fields = ['typename','id']
 
+@validate_fields(expressions=list)
 class ExprList(AST):
   _fields = ['expressions']  
+
+  def append(self,e):
+    self.expressions.append(e)
 
 class Literal(AST):
   '''
@@ -172,7 +177,7 @@ class Literal(AST):
   _fields = ['value']
 
 class Typename(AST):
-  _fields = ['id']
+  _fields = ['value']
 
 
 class Empty(AST):
@@ -308,26 +313,30 @@ class DotVisitor():
         self.graph = pydot.Dot("AST", graph_type='digraph')
 
     def visit(self,node):
-        if hasattr(node, "id"):
-            tmp = getattr(node,"id")
-            vertice =pydot.Node("%s" % node.__class__.__name__ + " " + str(tmp) + " " +str(self.num) , style="filled", fillcolor="green")
-        else:
-            vertice =pydot.Node("%s" % node.__class__.__name__ + " " + str(self.num) , style="filled", fillcolor="green")
+        st =""
+        if hasattr(node, "value"):
+            tmp = getattr(node,"value")
+            st+=" => " + str(tmp)
+        elif hasattr(node, "op"):
+            tmp = getattr(node,"op")
+            st+=" => " + str(tmp)
+        vertice =pydot.Node("%s " % node.__class__.__name__ + st + " (" + str(self.num)+")" , style="filled", fillcolor="green")
         self.num += 1
-        for field in getattr(node,"_fields"):
-            value = getattr(node,field)           
-            if isinstance(value,list):
-                for elemento in value:
-                    if isinstance(elemento,AST):
-                        nvertice = self.visit(elemento)
-                        self.graph.add_edge(pydot.Edge(vertice, nvertice))                                         
-            elif isinstance(value,AST):
-                nvertice = self.visit(value)
-                self.graph.add_edge(pydot.Edge(vertice, nvertice))
-            #else :
-             #    nvertice = pydot.Node("%s" % node._fields + " " + str(self.num) , style="filled", fillcolor="green")
-             #    self.graph.add_edge(pydot.Edge(vertice, nvertice))
-        self.graph.add_node(vertice)
-        return vertice          
+        if hasattr(node,"_fields"):
+            for field in getattr(node,"_fields"):
+                value = getattr(node,field)           
+                if isinstance(value,list):
+                    for elemento in value:
+                        if isinstance(elemento,AST):
+                            nvertice = self.visit(elemento)
+                            self.graph.add_edge(pydot.Edge(vertice, nvertice))                                         
+                elif isinstance(value,AST):
+                    nvertice = self.visit(value)
+                    self.graph.add_edge(pydot.Edge(vertice, nvertice))
+              #else :
+               #    nvertice = pydot.Node("%s" % node._fields + " " + str(self.num) , style="filled", fillcolor="green")
+               #    self.graph.add_edge(pydot.Edge(vertice, nvertice))
+            self.graph.add_node(vertice)
+            return vertice          
         
 
