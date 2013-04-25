@@ -1,5 +1,6 @@
-func hola ()
+func hola (v:int)
+  tmp1:int;
   begin
-    if a < 2 and tmp < tmp then
-      a := a+b;
+    tmp1 := 2 + 2;
+  
   end

@@ -48,10 +48,10 @@ def p_statements(p):
 
 def p_statements_1(p):
     '''
-    statements : statements statement
+    statements : statements SEMI statement
 
     '''
-    p[1].append(p[2])
+    p[1].append(p[3])
     p[0] = p[1]
 
 def p_statement(p):
@@ -61,18 +61,18 @@ def p_statement(p):
             | if
             | if_else
             | while
-            | BREAK SEMI
-            | SKIP SEMI
+            | BREAK 
+            | SKIP 
             | read
             | write
-            | funcall SEMI
+            | funcall 
             | return
     '''
     p[0] = p[1]
 
 #def p_const_declaration(p):
 #    '''
-#    const_declaration : CONST id ASSIGN expression SEMI
+#    const_declaration : CONST id ASSIGN expression 
 #    '''
 #    p[0] = ConstDeclaration(p[2],p[4])
 
@@ -97,9 +97,15 @@ def p_local(p):
     '''
     p[0] = Local(p[1], p[3])
 
+def p_local_1(p):
+    '''
+    local : function SEMI
+    '''
+    p[0] = p[1]
+
 def p_local_2(p):
     '''
-    local : id COLON typename LBRACKET literal RBRACKET SEMI 
+    local : id COLON typename LBRACKET literal RBRACKET   SEMI
     '''
     p[0] = Local_vec(p[1], p[3], p[5])
 
@@ -163,31 +169,31 @@ def p_while(p):
 
 def p_assign(p):
     '''
-    assign : id ASSIGN expression SEMI 
+    assign : id ASSIGN expression  
     '''
     p[0] = Assignment(p[1], p[3])
 
 def p_print(p):
     '''
-    print : PRINT LPAREN literal RPAREN SEMI
+    print : PRINT LPAREN literal RPAREN 
     '''
     p[0] = Print(p[3])
 
 def p_write(p):
     '''
-    write : WRITE LPAREN expression RPAREN SEMI
+    write : WRITE LPAREN expression RPAREN 
     '''
     p[0] = Write(p[3])
 
 def p_return(p):
     '''
-    return : RETURN expression SEMI
+    return : RETURN expression 
     '''
     p[0] = Return(p[2])
 
 def p_read(p):
     '''
-    read : READ LPAREN id RPAREN SEMI
+    read : READ LPAREN id RPAREN 
     '''
     p[0] = Read(p[3])
 
