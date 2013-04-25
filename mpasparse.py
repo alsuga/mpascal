@@ -24,6 +24,18 @@ def p_program(p):
     else:
         p[0] = Program([p[1]])
 
+def p_st(p):
+    '''
+    st : BEGIN statements END
+    '''
+    p[0] = p[2]
+
+def p_st_1(p):
+    '''
+    st : statement
+    '''
+    p[0] = p[1]
+
 def p_statements(p):
     '''
     statements : statement
@@ -169,19 +181,19 @@ def p_expression_funcall(p):
 
 def p_if(p):
     '''
-    if : IF cond THEN statements %prec ELSE
+    if : IF cond THEN st %prec ELSE
     '''
     p[0] = IfStatement(p[2], p[4])
 
 def p_if_else(p):
     '''
-    if_else :  IF cond THEN statements ELSE statements
+    if_else :  IF cond THEN st ELSE st
     '''
     p[0] = If_elseStatement(p[2], p[4], p[6])
 
 def p_while(p):
     '''
-    while : WHILE cond statements
+    while : WHILE cond st
     '''
     p[0] = WhileStatement(p[2], p[3])
 
