@@ -350,7 +350,7 @@ def dump_tree(node, indent = ""):
         datatype = node.datatype
 
     if(node.__class__.__name__ != "str" and node.__class__.__name__ != "list"):
-        print "%s%s  %s" % (indent, node.__class__.__name__, datatype)
+        print "%s%s  %s" % (indent , node.__class__.__name__, datatype)
     indent = indent.replace("-"," ")
     indent = indent.replace("+"," ")
     if hasattr(node,'_fields'):
