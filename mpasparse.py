@@ -24,6 +24,8 @@ def p_program(p):
     else:
         p[0] = Program([p[1]])
 
+#vuelve st para los BEGIN  y END en los while, if y else
+
 def p_st(p):
     '''
     st : BEGIN statements END
