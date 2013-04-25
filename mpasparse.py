@@ -143,6 +143,24 @@ def p_parm_declaration_1(p):
     '''
     p[0] = Parameters_Declaration_vec(p[1], p[3], p[5])
 
+def p_if(p):
+    '''
+    if : IF cond THEN st %prec ELSE
+    '''
+    p[0] = IfStatement(p[2], p[4])
+
+def p_if_else(p):
+    '''
+    if_else :  IF cond THEN st ELSE st
+    '''
+    p[0] = If_elseStatement(p[2], p[4], p[6])
+
+def p_while(p):
+    '''
+    while : WHILE cond DO st
+    '''
+    p[0] = WhileStatement(p[2], p[3])
+
 def p_assign(p):
     '''
     assign : id ASSIGN expression SEMI 
@@ -173,6 +191,13 @@ def p_read(p):
     '''
     p[0] = Read(p[3])
 
+
+def p_expression_funcall_1(p):
+    '''
+    funcall :  id LPAREN exprlist RPAREN 
+    '''
+    p[0] = FunCall(p[1], p[3])
+
 def p_expression_unary(p):
     '''
     expression :  PLUS expression %prec UNARY
@@ -185,37 +210,13 @@ def p_expression_group(p):
     '''
     expression : LPAREN expression RPAREN
     '''
-    p[0] = p[2]
+    p[0] = Group(p[2])
 
 def p_expression_funcall(p):
     '''
     expression :  funcall
     '''
     p[0] = p[1]
-
-def p_expression_funcall_1(p):
-    '''
-    funcall :  id LPAREN exprlist RPAREN 
-    '''
-    p[0] = FunCall(p[1], p[3])
-
-def p_if(p):
-    '''
-    if : IF cond THEN st %prec ELSE
-    '''
-    p[0] = IfStatement(p[2], p[4])
-
-def p_if_else(p):
-    '''
-    if_else :  IF cond THEN st ELSE st
-    '''
-    p[0] = If_elseStatement(p[2], p[4], p[6])
-
-def p_while(p):
-    '''
-    while : WHILE cond DO st
-    '''
-    p[0] = WhileStatement(p[2], p[3])
 
 def p_expression(p):
     '''
@@ -224,15 +225,15 @@ def p_expression(p):
                 | expression TIMES expression
                 | expression DIVIDE expression
     '''
-    if (len (p) == 4):
-        if(p[2] == '+' ):
-            p[0] = BinaryOp("+",p[1],p[3])
-        elif (p[2] == '-'):
-            p[0] = BinaryOp("-",p[1],p[3])
-        elif (p[2] == '*' ):
-            p[0] = BinaryOp("*",p[1],p[3])
-        else :
-            p[0] = BinaryOp("/",p[1],p[3])
+    
+    if(p[2] == '+' ):
+        p[0] = BinaryOp("+",p[1],p[3])
+    elif (p[2] == '-'):
+        p[0] = BinaryOp("-",p[1],p[3])
+    elif (p[2] == '*' ):
+        p[0] = BinaryOp("*",p[1],p[3])
+    else :
+        p[0] = BinaryOp("/",p[1],p[3])
 
 def p_comp(p):
     '''
@@ -243,19 +244,18 @@ def p_comp(p):
          | expression EQ expression
          | expression NE expression
     '''
-    if (len (p) == 4):
-        if(p[2] == '<' ):
-            p[0] = BinaryOp("<",p[1],p[3])
-        elif (p[2] == '>'):
-            p[0] = BinaryOp(">",p[1],p[3])
-        elif (p[2] == '<=' ):
-            p[0] = BinaryOp("<=",p[1],p[3])
-        elif (p[2] == '>='):
-            p[0] = BinaryOp(">=",p[1],p[3])
-        elif (p[2] == '=='):
-            p[0] = BinaryOp("==",p[1],p[3])
-        else:
-            p[0] = BinaryOp("!=",p[1],p[3])
+    if(p[2] == '<' ):
+        p[0] = BinaryOp("<",p[1],p[3])
+    elif (p[2] == '>'):
+        p[0] = BinaryOp(">",p[1],p[3])
+    elif (p[2] == '<=' ):
+        p[0] = BinaryOp("<=",p[1],p[3])
+    elif (p[2] == '>='):
+        p[0] = BinaryOp(">=",p[1],p[3])
+    elif (p[2] == '=='):
+        p[0] = BinaryOp("==",p[1],p[3])
+    else:
+        p[0] = BinaryOp("!=",p[1],p[3])
 
     
 def p_cond(p):
@@ -266,9 +266,9 @@ def p_cond(p):
     '''
     if( len(p) == 4):
         if(p[2] == 'or' ):
-            p[0] = BinaryOp('or', p[1], p[3])
+            p[0] = Relation('or', p[1], p[3])
         else:
-            p[0] = BinaryOp('and', p[1], p[3])
+            p[0] = Relation('and', p[1], p[3])
     elif (len(p) == 3):
         p[0] = UnaryOp('not',p[2])
 
@@ -287,7 +287,7 @@ def p_cond_1(p):
     '''
     cond : LPAREN cond RPAREN
     ''' 
-    p[0] = p[1]
+    p[0] = Group(p[1])
 
 def p_expression_1(p):
     '''

@@ -331,6 +331,9 @@ reserved = {
   'return' : 'RETURN',
   'skip' : 'SKIP',
   'do' : 'DO',
+  'and' : 'LAND',
+  'or' : 'LOR',
+  'not' : 'LNOT',
 }
 
 operators = {
@@ -350,9 +353,9 @@ operators = {
   r'>=' : "GE",
   r'>' : "GT",
   r'!=' : "NE",
-  r'and' : "LAND",
-  r'or' : "LOR",
-  r'not' : "LNOT",
+  #r'and' : "LAND",
+  #r'or' : "LOR",
+  #r'not' : "LNOT",
 }
 
 # ----------------------------------------------------------------------

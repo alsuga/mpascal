@@ -310,17 +310,17 @@ class DotVisitor():
     graph = None
     num = 1
     def __init__(self):
-        self.graph = pydot.Dot("AST", graph_type='digraph')
+        self.graph = pydot.Dot("AST", graph_type='digraph',strict = False,simplify= False)
 
     def visit(self,node):
         st =""
         if hasattr(node, "value"):
             tmp = getattr(node,"value")
-            st+=" => " + str(tmp)
+            st+=" -> '" + str(tmp) + "'"
         elif hasattr(node, "op"):
             tmp = getattr(node,"op")
-            st+=" => " + str(tmp)
-        vertice =pydot.Node("%s " % node.__class__.__name__ + st + " (" + str(self.num)+")" , style="filled", fillcolor="green")
+            st+=" -> '" + str(tmp) + "'"
+        vertice =pydot.Node("%s " % (node.__class__.__name__  + st + " (" +str(self.num)+")" ) , style="filled", fillcolor="green")
         self.num += 1
         if hasattr(node,"_fields"):
             for field in getattr(node,"_fields"):
