@@ -27,17 +27,16 @@ def p_program(p):
 def p_statements(p):
     '''
     statements : statement
-               | BEGIN st END
+                | empty
     '''
-    if len(p) == 2 :
-        p[0] = p[1]
-    else:
-        p[0] = p[2]
+    p[0] = p[1]
 
-def p_st(p):
+# se quito st, entrando en la regla statements 
+
+def p_statements(p):
     '''
-    st : st statement
-       | empty
+    statements : statements statement
+
     '''
     p[0] = p[1]
     p[0].append(p[2])
@@ -67,10 +66,11 @@ def p_locals(p):
     p[0] = Locals([p[1]])
     p[0].append(p[2])
 
+#se quito el empty, causaba problemas
+
 def p_locals_1(p):
     '''
     locals : local
-            | empty
     '''
     p[0] = p[1]
 
@@ -91,6 +91,14 @@ def p_fundecl(p):
     function : FUNC id LPAREN parameters RPAREN locals BEGIN statements END
     '''
     p[0] = Funcdecl(p[2], p[4], p[6], p[8]) 
+
+#nueva, no cambia el arbol
+
+def p_fundecl_1(p):
+    '''
+    function : FUNC id LPAREN parameters RPAREN BEGIN statements END
+    '''
+    p[0] = Funcdecl(p[2], p[4], None, p[7]) 
 
 def p_parameters(p):
     '''
@@ -148,12 +156,11 @@ def p_expression_group(p):
     '''
     expression : LPAREN expression RPAREN
     '''
-    p[0] = Group(p[2])
+    p[0] = p[2]
 
 def p_expression_funcall(p):
     '''
     expression :  id LPAREN exprlist RPAREN 
-                | id LPAREN RPAREN
     '''
     if len(p == 5):
         p[0] = FunCall(p[1], p[3])
@@ -233,10 +240,20 @@ def p_cond(p):
     elif (len(p) == 3):
         p[0] = UnaryOp('not',p[2])
 
+#se omiten los tipos de dato bool por ahora
+
+#def p_cond_1(p):
+#    '''
+#    cond : id
+#          | literal
+#    ''' 
+#    p[0] = p[1]
+
+#se agregan las agrupaciones de los cond
+
 def p_cond_1(p):
     '''
-    cond : id
-          | literal
+    cond : LPAREN cond RPAREN
     ''' 
     p[0] = p[1]
 
@@ -263,15 +280,17 @@ def p_exprlist(p):
 def p_exprlist_1(p):
     '''
     exprlist : expression
+            | empty
     '''
     p[0] = ExprList([p[1]])
+
+#se quital los literales bool
 
 def p_literal(p):
     '''
     literal : INTEGER
             | FLOAT
             | STRING
-            | BOOLEAN
     '''
     p[0] = Literal(p[1])
 
