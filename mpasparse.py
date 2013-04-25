@@ -41,13 +41,12 @@ def p_st_1(p):
 def p_statements(p):
     '''
     statements : statement
-                | empty
     '''
     p[0] = p[1]
 
 # se quito st, entrando en la regla statements 
 
-def p_statements(p):
+def p_statements_1(p):
     '''
     statements : statements statement
 

@@ -132,7 +132,7 @@ tokens = [
   'EQ', 'NE',
 
   # Literals
-  'INTEGER', 'FLOAT', 'STRING', 'BOOLEAN',
+  'INTEGER', 'FLOAT', 'STRING', 
   
   #tipos de dato
   'TYPENAME',
@@ -292,10 +292,10 @@ def t_STRING(t):
   return t
 
 
-def t_BOOLEAN(t):
-  r'\b(true|false)\b'
-  t.value = True if t.value=='true' else False
-  return t
+#def t_BOOLEAN(t):
+#  r'\b(true|false)\b'
+#  t.value = True if t.value=='true' else False
+#  return t
 
 # ----------------------------------------------------------------------
 # *** DEBE COMPLETAR: Escrina la regexp y agrege la palabra ***
