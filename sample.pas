@@ -1,6 +1,6 @@
 func hola (v:int)
   tmp1:int;
   begin
-    tmp1 := 2 + 2;
+    read(tmp1[1213 * 123])
   
   end

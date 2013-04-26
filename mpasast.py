@@ -90,9 +90,6 @@ class Locals(AST):
     self.locals.append(e)
 
 class Local(AST):
-  _fields = ['id', 'typename']
-
-class Local_vec(AST):
   _fields = ['id', 'typename','size']
 
 class Funcdecl(AST):
@@ -106,32 +103,28 @@ class Parameters(AST):
     self.parameters.append(e)
 
 class Parameters_Declaration(AST):
-  _fields = ['id', 'typename']
-
-
-class Parameters_Declaration_vec(AST):
   _fields = ['id', 'typename','size']
 
-#  def append(self,e):
-#    self.append(e)
-
-class Id(AST):
-  _fields = ['value']
-
-class Id_vec(AST):
-  _fields = ['value','pos']
+class Location(AST):
+  _fields = ['id','pos']
 
 class Assignment(AST):
-  _fields = ['id', 'expression']
+  _fields = ['location', 'expression']
 
 class Print(AST):
-  _fields = ['liteal']
+  _fields = ['literal']
 
 class Write(AST):
   _fields = ['expression']
 
 class Read(AST):
-  _fields = ['id']
+  _fields = ['location']
+
+class Break(AST):
+  _fields = []
+
+class Skip(AST):
+  _fields = []    
 
 class Return(AST):
   _fields = ['expression']
@@ -152,16 +145,13 @@ class FunCall(AST):
   _fields = ['id', 'parameters']
 
 class IfStatement(AST):
-  _fields = ['cond', 'then_b']
-
-class If_elseStatement(AST):
   _fields = ['cond', 'then_b', 'else_b']
 
 class WhileStatement(AST):
   _fields = ['cond', 'body']
 
 class Cast(AST):
-  _fields = ['typename','id']
+  _fields = ['typename','expression']
 
 @validate_fields(expressions=list)
 class ExprList(AST):
@@ -175,10 +165,6 @@ class Literal(AST):
   Un valor constante como 2, 2.5, o "dos"
   '''
   _fields = ['value']
-
-class Typename(AST):
-  _fields = ['value']
-
 
 class Empty(AST):
   _fields = []

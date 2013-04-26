@@ -68,7 +68,12 @@ def p_statement(p):
             | funcall 
             | return
     '''
-    p[0] = p[1]
+    if(p[1] == 'skip'):
+        p[0] = Skip()
+    elif p[1] == 'break':
+        p[0] = Break()
+    else:
+        p[0] = p[1]
 
 #def p_const_declaration(p):
 #    '''
@@ -83,8 +88,6 @@ def p_locals(p):
     p[1].append(p[2])
     p[0] = p[1]
 
-#se quito el empty, causaba problemas
-
 def p_locals_1(p):
     '''
     locals : local
@@ -93,25 +96,25 @@ def p_locals_1(p):
 
 def p_local(p):
     '''
-    local : id COLON typename SEMI
+    local : ID COLON TYPENAME SEMI
     '''
-    p[0] = Local(p[1], p[3])
+    p[0] = Local(p[1], p[3],None)
 
 def p_local_1(p):
+    '''
+    local : ID COLON TYPENAME LBRACKET literal RBRACKET SEMI
+    '''
+    p[0] = Local(p[1], p[3], p[5])
+
+def p_local_2(p):
     '''
     local : function SEMI
     '''
     p[0] = p[1]
 
-def p_local_2(p):
-    '''
-    local : id COLON typename LBRACKET literal RBRACKET   SEMI
-    '''
-    p[0] = Local_vec(p[1], p[3], p[5])
-
 def p_fundecl(p):
     '''
-    function : FUNC id LPAREN parameters RPAREN locals BEGIN statements END
+    function : FUNC ID LPAREN parameters RPAREN locals BEGIN statements END
     '''
     p[0] = Funcdecl(p[2], p[4], p[6], p[8]) 
 
@@ -119,7 +122,7 @@ def p_fundecl(p):
 
 def p_fundecl_1(p):
     '''
-    function : FUNC id LPAREN parameters RPAREN BEGIN statements END
+    function : FUNC ID LPAREN parameters RPAREN BEGIN statements END
     '''
     p[0] = Funcdecl(p[2], p[4], None, p[7]) 
 
@@ -139,37 +142,37 @@ def p_parameters_1(p):
 
 def p_parm_declaration(p):
     '''
-    parm_declaration : id COLON typename
+    parm_declaration : ID COLON TYPENAME
     '''
-    p[0] = Parameters_Declaration(p[1], p[3])
+    p[0] = Parameters_Declaration(p[1], p[3],None)
 
 def p_parm_declaration_1(p):
     '''
-    parm_declaration : id COLON typename LBRACKET literal RBRACKET
+    parm_declaration : ID COLON TYPENAME LBRACKET literal RBRACKET
     '''
-    p[0] = Parameters_Declaration_vec(p[1], p[3], p[5])
+    p[0] = Parameters_Declaration(p[1], p[3], p[5])
 
 def p_if(p):
     '''
     if : IF cond THEN st %prec ELSE
     '''
-    p[0] = IfStatement(p[2], p[4])
+    p[0] = IfStatement(p[2], p[4], None)
 
 def p_if_else(p):
     '''
     if_else :  IF cond THEN st ELSE st
     '''
-    p[0] = If_elseStatement(p[2], p[4], p[6])
+    p[0] = IfStatement(p[2], p[4], p[6])
 
 def p_while(p):
     '''
     while : WHILE cond DO st
     '''
-    p[0] = WhileStatement(p[2], p[3])
+    p[0] = WhileStatement(p[2], p[4])
 
 def p_assign(p):
     '''
-    assign : id ASSIGN expression  
+    assign : location ASSIGN expression  
     '''
     p[0] = Assignment(p[1], p[3])
 
@@ -193,14 +196,14 @@ def p_return(p):
 
 def p_read(p):
     '''
-    read : READ LPAREN id RPAREN 
+    read : READ LPAREN location RPAREN 
     '''
     p[0] = Read(p[3])
 
 
 def p_expression_funcall_1(p):
     '''
-    funcall :  id LPAREN exprlist RPAREN 
+    funcall :  ID LPAREN exprlist RPAREN 
     '''
     p[0] = FunCall(p[1], p[3])
 
@@ -220,7 +223,7 @@ def p_expression_group(p):
 
 def p_expression_funcall(p):
     '''
-    expression :  funcall
+    expression : funcall
     '''
     p[0] = p[1]
 
@@ -293,18 +296,18 @@ def p_cond_1(p):
     '''
     cond : LPAREN cond RPAREN
     ''' 
-    p[0] = Group(p[1])
+    p[0] = Group(p[2])
 
 def p_expression_1(p):
     '''
-    expression : id 
+    expression : location
                 | literal
     '''
     p[0] = p[1]
 
 def p_expression_2(p):
     '''
-    expression : typename LPAREN id RPAREN 
+    expression : TYPENAME LPAREN expression RPAREN 
     '''
     p[0] = Cast(p[1],p[3])
 
@@ -312,8 +315,8 @@ def p_exprlist(p):
     '''
     exprlist :  exprlist COMMA expression
     '''
+    p[1].append(p[3])
     p[0] = p[1]
-    p[0].append(p[3])
 
 def p_exprlist_1(p):
     '''
@@ -332,30 +335,23 @@ def p_literal(p):
     '''
     p[0] = Literal(p[1])
 
-def p_typename(p):
+def p_location(p):
     '''
-    typename : TYPENAME
+    location : ID
     '''
-    p[0] = Typename(p[1])
+    p[0] = Location(p[1],None)
 
-def p_id(p):
+def p_location_2(p):
     '''
-    id : ID
+    location : ID LBRACKET expression RBRACKET
     '''
-    p[0] = Id(p[1])
-
-def p_id_2(p):
-    '''
-    id : ID LBRACKET expression RBRACKET
-    '''
-    p[0] = Id_vec(p[1],p[3])
+    p[0] = Location(p[1],p[3])
 
 def p_empty(p):
     '''
     empty    :
     '''
     pass
-
 
 def p_error(p):
     if p:
@@ -374,7 +370,7 @@ def dump_tree(node, indent = ""):
     else:
         datatype = node.datatype
 
-    if(node.__class__.__name__ != "str" and node.__class__.__name__ != "list"):
+    if(node.__class__.__name__ != "str" and node.__class__.__name__ != "list" and datatype != "NoneType"):
         print "%s%s  %s" % (indent , node.__class__.__name__, datatype)
     indent = indent.replace("-"," ")
     indent = indent.replace("+"," ")
@@ -388,13 +384,13 @@ def dump_tree(node, indent = ""):
                 c = getattr(node,mio[i])
             else:
              c = mio[i]
-            if i == len(mio)-1:
-                dump_tree(c, indent + "  +-- ")
-            else:
-                dump_tree(c, indent + "  |-- ")
+            if c != None:
+                if i == len(mio)-1:
+                    dump_tree(c, indent + "  +-- ")
+                else:
+                    dump_tree(c, indent + "  |-- ")
     else:
         print indent, mio
-
 
 if __name__ == '__main__':
     import mpaslex
@@ -404,11 +400,11 @@ if __name__ == '__main__':
     parser = make_parser()
     with subscribe_errors(lambda msg: sys.stdout.write(msg+"\n")):
         program = parser.parse(open(sys.argv[1]).read())
-    dot = DotVisitor()
-    dot.visit(program)
-    dot.graph.write_png("grafo.png")
+    #dot = DotVisitor()
+    #dot.visit(program)
+    #dot.graph.write_png("grafo.png")
 
-    dump_tree(program)
+    #dump_tree(program)
     #for depth,node in flatten(program):
     #    dump_tree(node)
         #print("%s%s" % (" "*(4*depth),node.__class__.__name__))

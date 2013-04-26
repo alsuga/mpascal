@@ -321,6 +321,7 @@ reserved = {
   'while':'WHILE',
 #  'const':'CONST',
   'func':'FUNC',
+  'fun':'FUNC',
   'print':'PRINT',
   'begin':'BEGIN',
   'end':'END',
@@ -353,9 +354,6 @@ operators = {
   r'>=' : "GE",
   r'>' : "GT",
   r'!=' : "NE",
-  #r'and' : "LAND",
-  #r'or' : "LOR",
-  #r'not' : "LNOT",
 }
 
 # ----------------------------------------------------------------------
