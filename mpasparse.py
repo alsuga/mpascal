@@ -28,15 +28,15 @@ def p_program(p):
 
 def p_st(p):
     '''
-    st : BEGIN statements END
+    statement : BEGIN statements END
     '''
     p[0] = p[2]
 
-def p_st_1(p):
-    '''
-    st : statement
-    '''
-    p[0] = p[1]
+#def p_st_1(p):
+#    '''
+#    st : statement
+#    '''
+#    p[0] = p[1]
 
 def p_statements(p):
     '''
@@ -154,19 +154,19 @@ def p_parm_declaration_1(p):
 
 def p_if(p):
     '''
-    if : IF cond THEN st %prec ELSE
+    if : IF cond THEN statement %prec ELSE
     '''
     p[0] = IfStatement(p[2], p[4], None)
 
 def p_if_else(p):
     '''
-    if_else :  IF cond THEN st ELSE st
+    if_else :  IF cond THEN statement ELSE statement
     '''
     p[0] = IfStatement(p[2], p[4], p[6])
 
 def p_while(p):
     '''
-    while : WHILE cond DO st
+    while : WHILE cond DO statement
     '''
     p[0] = WhileStatement(p[2], p[4])
 
@@ -330,10 +330,20 @@ def p_exprlist_1(p):
 def p_literal(p):
     '''
     literal : INTEGER
-            | FLOAT
-            | STRING
     '''
-    p[0] = Literal(p[1])
+    p[0] = Literal("int",p[1])
+
+def p_literal_1(p):
+    '''
+    literal : FLOAT
+    '''
+    p[0] = Literal("float",p[1])
+
+def p_literal_2(p):
+    '''
+    literal : STRING
+    '''
+    p[0] = Literal("string",p[1])
 
 def p_location(p):
     '''
@@ -363,34 +373,6 @@ def make_parser():
     parser = yacc.yacc()
     return parser
 
-def dump_tree(node, indent = ""):
-    #print node
-    if not hasattr(node, "datatype"):
-        datatype = ""
-    else:
-        datatype = node.datatype
-
-    if(node.__class__.__name__ != "str" and node.__class__.__name__ != "list" and datatype != "NoneType"):
-        print "%s%s  %s" % (indent , node.__class__.__name__, datatype)
-    indent = indent.replace("-"," ")
-    indent = indent.replace("+"," ")
-    if hasattr(node,'_fields'):
-        mio = node._fields
-    else:
-        mio = node
-    if(isinstance(mio,list)):
-        for i in range(len(mio)):
-            if(isinstance(mio[i],str) ):
-                c = getattr(node,mio[i])
-            else:
-             c = mio[i]
-            if c != None:
-                if i == len(mio)-1:
-                    dump_tree(c, indent + "  +-- ")
-                else:
-                    dump_tree(c, indent + "  |-- ")
-    else:
-        print indent, mio
 
 if __name__ == '__main__':
     import mpaslex
@@ -400,11 +382,12 @@ if __name__ == '__main__':
     parser = make_parser()
     with subscribe_errors(lambda msg: sys.stdout.write(msg+"\n")):
         program = parser.parse(open(sys.argv[1]).read())
-    #dot = DotVisitor()
-    #dot.visit(program)
-    #dot.graph.write_png("grafo.png")
+    print "listo parte uno"
+    dot = DotVisitor()
+    dot.visit(program)
+    print "listo visitado"
+    dot.graph.write_png("grafo.png")
 
     #dump_tree(program)
     #for depth,node in flatten(program):
-    #    dump_tree(node)
-        #print("%s%s" % (" "*(4*depth),node.__class__.__name__))
+    #    print("%s%s" % (" "*(4*depth),node.__class__.__name__))

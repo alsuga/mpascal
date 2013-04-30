@@ -76,12 +76,8 @@ class Statements(AST):
   def append(self,e):
     self.statements.append(e)
 
-class Statement(AST):
-  _fields = ['statement']
-
 class ConstDeclaration(AST):
   _fields = ['id', 'typename']
-
 
 @validate_fields(locals=list)
 class Locals(AST):
@@ -91,7 +87,7 @@ class Locals(AST):
 
 class Local(AST):
   _fields = ['id', 'typename','size']
-
+#falta
 class Funcdecl(AST):
   _fields = ['id','parameters', 'locals', 'statements']
 
@@ -128,7 +124,7 @@ class Skip(AST):
 
 class Return(AST):
   _fields = ['expression']
-    
+#falta    
 class UnaryOp(AST):
   _fields = ['op', 'right']
 
@@ -140,7 +136,7 @@ class Relation(AST):
 
 class Group(AST):
   _fields = ['expression']
-
+#falta
 class FunCall(AST):
   _fields = ['id', 'parameters']
 
@@ -164,13 +160,11 @@ class Literal(AST):
   '''
   Un valor constante como 2, 2.5, o "dos"
   '''
-  _fields = ['value']
+  _fields = ['tipo','value']
 
 class Empty(AST):
   _fields = []
-
-
-
+     
 # Usted deberá añadir mas nodos aquí.  Algunos nodos sugeridos son
 # BinaryOperator, UnaryOperator, ConstDeclaration, VarDeclaration, 
 # AssignmentStatement, etc...
@@ -206,6 +200,7 @@ class NodeVisitor(object):
     tree = parse(txt)
     VisitOps().visit(tree)
   '''
+
   def visit(self,node):
     '''
     Ejecuta un método de la forma visit_NodeName(node) donde
@@ -292,37 +287,121 @@ def flatten(top):
   return d.nodes
 
 
-class DotVisitor():
-    graph = None
-    num = 1
-    def __init__(self):
-        self.graph = pydot.Dot("AST", graph_type='digraph',strict = False,simplify= False)
+def dump_tree(node, indent = ""):
+    #print node
+    if not hasattr(node, "datatype"):
+        datatype = ""
+    else:
+        datatype = node.datatype
 
-    def visit(self,node):
-        st =""
-        if hasattr(node, "value"):
-            tmp = getattr(node,"value")
-            st+=" -> '" + str(tmp) + "'"
-        elif hasattr(node, "op"):
-            tmp = getattr(node,"op")
-            st+=" -> '" + str(tmp) + "'"
-        vertice =pydot.Node("%s " % (node.__class__.__name__  + st + " (" +str(self.num)+")" ) , style="filled", fillcolor="green")
-        self.num += 1
-        if hasattr(node,"_fields"):
-            for field in getattr(node,"_fields"):
-                value = getattr(node,field)           
-                if isinstance(value,list):
-                    for elemento in value:
-                        if isinstance(elemento,AST):
-                            nvertice = self.visit(elemento)
-                            self.graph.add_edge(pydot.Edge(vertice, nvertice))                                         
-                elif isinstance(value,AST):
-                    nvertice = self.visit(value)
-                    self.graph.add_edge(pydot.Edge(vertice, nvertice))
-              #else :
-               #    nvertice = pydot.Node("%s" % node._fields + " " + str(self.num) , style="filled", fillcolor="green")
-               #    self.graph.add_edge(pydot.Edge(vertice, nvertice))
-            self.graph.add_node(vertice)
-            return vertice          
-        
+    if(node.__class__.__name__ != "str" and node.__class__.__name__ != "list" and datatype != "NoneType"):
+        print "%s%s  %s" % (indent , node.__class__.__name__, datatype)
+    indent = indent.replace("-"," ")
+    indent = indent.replace("+"," ")
+    if hasattr(node,'_fields'):
+        mio = node._fields
+    else:
+        mio = node
+    if(isinstance(mio,list)):
+        for i in range(len(mio)):
+            if(isinstance(mio[i],str) ):
+                c = getattr(node,mio[i])
+            else:
+             c = mio[i]
+            if c != None:
+                if i == len(mio)-1:
+                    dump_tree(c, indent + "  +-- ")
+                else:
+                    dump_tree(c, indent + "  |-- ")
+    else:
+        print indent, mio
 
+
+class DotVisitor(NodeVisitor):
+  graph = None
+  num = 1
+  def __init__(self):
+    self.graph = pydot.Dot("AST", graph_type='digraph')
+
+  def visit_Parameters_Declaration(self, node):
+    st = str(getattr(node,"id")) + " -> " + str(getattr(node,"typename"))
+    self.num += 1
+    vertice =pydot.Node("%s Parametro => %s" % ("(" +str(self.num)+") ", st))
+    tmp = getattr(node,"size")
+    if str(tmp) != "None":
+      self.graph.add_edge(pydot.Edge(vertice,self.visit(tmp)))
+    self.graph.add_node(vertice)
+    return vertice
+
+  def visit_Cast(self, node):
+    st = str(getattr(node,"typename"))
+    self.num += 1
+    vertice =pydot.Node("%s Cast => %s" % ("(" +str(self.num)+") ", st))
+    nvertice = self.visit(getattr(node,"expression"))
+    self.graph.add_edge(pydot.Edge(vertice,nvertice))
+    return vertice
+
+  def visit_Location(self,node):
+    st = str(getattr(node,"id"))
+    self.num += 1
+    vertice =pydot.Node("%s Location => %s" % ("(" +str(self.num)+") ", st))
+    self.num += 1
+    if str(getattr(node,"pos")) != "None":
+      nvertice = self.visit(getattr(node,"pos"))
+      self.graph.add_edge(pydot.Edge(vertice, nvertice))
+    self.graph.add_node(vertice)
+    return vertice
+
+  def visit_Local(self,node):
+    st = str(getattr(node,"id")) + " -> " + str(getattr(node,"typename"))
+    self.num += 1
+    vertice =pydot.Node("%s Local => %s" % ("(" +str(self.num)+") ", st))
+    tmp = getattr(node,"size")
+    if str(tmp) != "None":
+      self.graph.add_edge(pydot.Edge(vertice,self.visit(tmp)))
+    self.graph.add_node(vertice)
+    return vertice
+
+  def visit_Literal(self,node):
+    st = str(getattr(node,"tipo")) + " => " + str(getattr(node,"value"))
+    vertice =pydot.Node("%s Lit %s" % ("(" +str(self.num)+") ", st))
+    self.num += 1
+    return vertice
+
+  def visit_BinaryOp(self,node):
+    vertice =pydot.Node("%s Operador binario => '%s'" % (" (" +str(self.num)+")", str(getattr(node,"op"))))
+    self.num += 1
+    nvertice1 = self.visit(getattr(node,"left"))
+    nvertice2 = self.visit(getattr(node,"right"))
+    self.graph.add_edge(pydot.Edge(vertice, nvertice1))
+    self.graph.add_edge(pydot.Edge(vertice, nvertice2))
+    return vertice
+
+  def visit_Relation(self,node):
+    vertice =pydot.Node("%s Operador relacional '%s'" % (" (" +str(self.num)+")", str(getattr(node,"op"))))
+    self.num += 1
+    nvertice1 = self.visit(getattr(node,"left"))
+    nvertice2 = self.visit(getattr(node,"right"))
+    self.graph.add_edge(pydot.Edge(vertice, nvertice1))
+    self.graph.add_edge(pydot.Edge(vertice, nvertice2))
+    return vertice
+
+  def visit_Empty(self,node):
+    pass
+
+  def generic_visit(self,node):
+    vertice = pydot.Node("%s " % (" (" +str(self.num)+") " + node.__class__.__name__))
+    self.num += 1
+    if hasattr(node,"_fields"):
+      for field in getattr(node,"_fields"):
+        value = getattr(node,field,None)
+        if isinstance(value, list):
+          for item in value:
+            if isinstance(item,AST):
+              nvertice = self.visit(item)
+              self.graph.add_edge(pydot.Edge(vertice, nvertice))  
+        elif isinstance(value, AST):
+          nvertice = self.visit(value) 
+          self.graph.add_edge(pydot.Edge(vertice,nvertice)) 
+      self.graph.add_node(vertice)
+    return vertice 
