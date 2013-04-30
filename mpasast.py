@@ -68,7 +68,6 @@ class Program(AST):
   def append(self, e):
     self.function.append(e)
 
-
 @validate_fields(statements=list)
 class Statements(AST):
   _fields = ['statements']
@@ -90,7 +89,6 @@ class Local(AST):
 #falta
 class Funcdecl(AST):
   _fields = ['id','parameters', 'locals', 'statements']
-
 
 @validate_fields(parameters=list)
 class Parameters(AST):
@@ -136,7 +134,7 @@ class Relation(AST):
 
 class Group(AST):
   _fields = ['expression']
-#falta
+
 class FunCall(AST):
   _fields = ['id', 'parameters']
 
@@ -323,6 +321,31 @@ class DotVisitor(NodeVisitor):
   def __init__(self):
     self.graph = pydot.Dot("AST", graph_type='digraph')
 
+  def visit_UnaryOp(self,node):
+    st = str(getattr(node,"op"))
+    self.num += 1
+    vertice =pydot.Node("%s Operador Unario => %s" % ("(" +str(self.num)+") ", st))
+    self.graph.add_edge(pydot.Edge(vertice,self.visit(getattr(node,"right"))))
+    return vertice
+
+  def visit_FunCall(self,node):
+    st = str(getattr(node,"id"))
+    self.num += 1
+    vertice =pydot.Node("%s LLamado a => %s" % ("(" +str(self.num)+") ", st))
+    tmp = getattr(node,"parameters")
+    if str(tmp) != "None":
+      self.graph.add_edge(pydot.Edge(vertice,self.visit(tmp)))
+    return vertice
+
+  def visit_Funcdecl(self,node):
+    st = str(getattr(node,"id"))
+    self.num += 1
+    vertice =pydot.Node("%s Funcion => %s" % ("(" +str(self.num)+") ", st))
+    for i in getattr(node,"_fields"):
+      if str(i) != "id" and str(i) != "None":
+        self.graph.add_edge(pydot.Edge(vertice,self.visit(getattr(node,i))))
+    return vertice
+
   def visit_Parameters_Declaration(self, node):
     st = str(getattr(node,"id")) + " -> " + str(getattr(node,"typename"))
     self.num += 1
@@ -330,7 +353,6 @@ class DotVisitor(NodeVisitor):
     tmp = getattr(node,"size")
     if str(tmp) != "None":
       self.graph.add_edge(pydot.Edge(vertice,self.visit(tmp)))
-    self.graph.add_node(vertice)
     return vertice
 
   def visit_Cast(self, node):
@@ -349,7 +371,6 @@ class DotVisitor(NodeVisitor):
     if str(getattr(node,"pos")) != "None":
       nvertice = self.visit(getattr(node,"pos"))
       self.graph.add_edge(pydot.Edge(vertice, nvertice))
-    self.graph.add_node(vertice)
     return vertice
 
   def visit_Local(self,node):
@@ -359,7 +380,6 @@ class DotVisitor(NodeVisitor):
     tmp = getattr(node,"size")
     if str(tmp) != "None":
       self.graph.add_edge(pydot.Edge(vertice,self.visit(tmp)))
-    self.graph.add_node(vertice)
     return vertice
 
   def visit_Literal(self,node):
@@ -403,5 +423,5 @@ class DotVisitor(NodeVisitor):
         elif isinstance(value, AST):
           nvertice = self.visit(value) 
           self.graph.add_edge(pydot.Edge(vertice,nvertice)) 
-      self.graph.add_node(vertice)
+      #self.graph.add_node(vertice)
     return vertice 
