@@ -35,7 +35,7 @@ Rule 29    if -> IF cond THEN statement
 Rule 30    if_else -> IF cond THEN statement ELSE statement
 Rule 31    while -> WHILE cond DO statement
 Rule 32    assign -> location ASSIGN expression
-Rule 33    print -> PRINT LPAREN literal RPAREN
+Rule 33    print -> PRINT LPAREN literals RPAREN
 Rule 34    write -> WRITE LPAREN expression RPAREN
 Rule 35    return -> RETURN expression
 Rule 36    read -> READ LPAREN location RPAREN
@@ -66,7 +66,7 @@ Rule 60    exprlist -> expression
 Rule 61    exprlist -> empty
 Rule 62    literal -> INTEGER
 Rule 63    literal -> FLOAT
-Rule 64    literal -> STRING
+Rule 64    literals -> STRING
 Rule 65    location -> ID
 Rule 66    location -> ID LBRACKET expression RBRACKET
 Rule 67    empty -> <empty>
@@ -126,7 +126,8 @@ funcall              : 15 41
 function             : 1 2 21
 if                   : 8
 if_else              : 9
-literal              : 20 28 33 57
+literal              : 20 28 57
+literals             : 33
 local                : 17 18
 locals               : 17 22
 location             : 32 36 56
@@ -315,7 +316,7 @@ state 15
     (15) statement -> . funcall
     (16) statement -> . return
     (32) assign -> . location ASSIGN expression
-    (33) print -> . PRINT LPAREN literal RPAREN
+    (33) print -> . PRINT LPAREN literals RPAREN
     (29) if -> . IF cond THEN statement
     (30) if_else -> . IF cond THEN statement ELSE statement
     (31) while -> . WHILE cond DO statement
@@ -465,29 +466,27 @@ state 25
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
     LNOT            shift and go to state 51
-    LPAREN          shift and go to state 60
-    PLUS            shift and go to state 56
+    LPAREN          shift and go to state 59
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    TYPENAME        shift and go to state 62
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     cond                           shift and go to state 53
-    location                       shift and go to state 57
-    expression                     shift and go to state 63
+    location                       shift and go to state 56
+    expression                     shift and go to state 62
 
 state 26
 
-    (33) print -> PRINT . LPAREN literal RPAREN
+    (33) print -> PRINT . LPAREN literals RPAREN
 
-    LPAREN          shift and go to state 64
+    LPAREN          shift and go to state 63
 
 
 state 27
@@ -517,7 +516,7 @@ state 28
     (15) statement -> . funcall
     (16) statement -> . return
     (32) assign -> . location ASSIGN expression
-    (33) print -> . PRINT LPAREN literal RPAREN
+    (33) print -> . PRINT LPAREN literals RPAREN
     (29) if -> . IF cond THEN statement
     (30) if_else -> . IF cond THEN statement ELSE statement
     (31) while -> . WHILE cond DO statement
@@ -548,7 +547,7 @@ state 28
     location                       shift and go to state 30
     statement                      shift and go to state 31
     print                          shift and go to state 32
-    statements                     shift and go to state 65
+    statements                     shift and go to state 64
     assign                         shift and go to state 43
     if                             shift and go to state 27
 
@@ -565,7 +564,7 @@ state 30
 
     (32) assign -> location . ASSIGN expression
 
-    ASSIGN          shift and go to state 66
+    ASSIGN          shift and go to state 65
 
 
 state 31
@@ -616,7 +615,7 @@ state 36
 
     (34) write -> WRITE . LPAREN expression RPAREN
 
-    LPAREN          shift and go to state 67
+    LPAREN          shift and go to state 66
 
 
 state 37
@@ -625,29 +624,29 @@ state 37
     (65) location -> ID .
     (66) location -> ID . LBRACKET expression RBRACKET
 
-    LPAREN          shift and go to state 69
+    LPAREN          shift and go to state 68
     PLUS            reduce using rule 65 (location -> ID .)
     MINUS           reduce using rule 65 (location -> ID .)
     TIMES           reduce using rule 65 (location -> ID .)
     DIVIDE          reduce using rule 65 (location -> ID .)
-    DO              reduce using rule 65 (location -> ID .)
-    LAND            reduce using rule 65 (location -> ID .)
-    LOR             reduce using rule 65 (location -> ID .)
-    THEN            reduce using rule 65 (location -> ID .)
-    RPAREN          reduce using rule 65 (location -> ID .)
     LT              reduce using rule 65 (location -> ID .)
     GT              reduce using rule 65 (location -> ID .)
     LE              reduce using rule 65 (location -> ID .)
     GE              reduce using rule 65 (location -> ID .)
     EQ              reduce using rule 65 (location -> ID .)
     NE              reduce using rule 65 (location -> ID .)
-    ASSIGN          reduce using rule 65 (location -> ID .)
     END             reduce using rule 65 (location -> ID .)
     SEMI            reduce using rule 65 (location -> ID .)
     ELSE            reduce using rule 65 (location -> ID .)
+    RPAREN          reduce using rule 65 (location -> ID .)
     RBRACKET        reduce using rule 65 (location -> ID .)
     COMMA           reduce using rule 65 (location -> ID .)
-    LBRACKET        shift and go to state 68
+    DO              reduce using rule 65 (location -> ID .)
+    LAND            reduce using rule 65 (location -> ID .)
+    LOR             reduce using rule 65 (location -> ID .)
+    THEN            reduce using rule 65 (location -> ID .)
+    ASSIGN          reduce using rule 65 (location -> ID .)
+    LBRACKET        shift and go to state 67
 
 
 state 38
@@ -680,23 +679,21 @@ state 38
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
     LNOT            shift and go to state 51
-    LPAREN          shift and go to state 60
-    PLUS            shift and go to state 56
+    LPAREN          shift and go to state 59
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    TYPENAME        shift and go to state 62
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
-    cond                           shift and go to state 70
-    location                       shift and go to state 57
-    expression                     shift and go to state 63
+    literal                        shift and go to state 58
+    cond                           shift and go to state 69
+    location                       shift and go to state 56
+    expression                     shift and go to state 62
 
 state 39
 
@@ -717,21 +714,19 @@ state 39
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
-    expression                     shift and go to state 72
-    location                       shift and go to state 57
+    literal                        shift and go to state 58
+    expression                     shift and go to state 71
+    location                       shift and go to state 56
 
 state 40
 
@@ -774,7 +769,7 @@ state 44
     (19) local -> ID COLON . TYPENAME SEMI
     (20) local -> ID COLON . TYPENAME LBRACKET literal RBRACKET SEMI
 
-    TYPENAME        shift and go to state 73
+    TYPENAME        shift and go to state 72
 
 
 state 45
@@ -795,7 +790,7 @@ state 45
     (15) statement -> . funcall
     (16) statement -> . return
     (32) assign -> . location ASSIGN expression
-    (33) print -> . PRINT LPAREN literal RPAREN
+    (33) print -> . PRINT LPAREN literals RPAREN
     (29) if -> . IF cond THEN statement
     (30) if_else -> . IF cond THEN statement ELSE statement
     (31) while -> . WHILE cond DO statement
@@ -818,7 +813,7 @@ state 45
     RETURN          shift and go to state 39
 
     funcall                        shift and go to state 24
-    statements                     shift and go to state 74
+    statements                     shift and go to state 73
     read                           shift and go to state 34
     return                         shift and go to state 33
     write                          shift and go to state 29
@@ -844,13 +839,11 @@ state 47
     (28) parm_declaration -> ID COLON TYPENAME LBRACKET . literal RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
-    literal                        shift and go to state 75
+    literal                        shift and go to state 74
 
 state 48
 
@@ -868,7 +861,7 @@ state 48
     (15) statement -> . funcall
     (16) statement -> . return
     (32) assign -> . location ASSIGN expression
-    (33) print -> . PRINT LPAREN literal RPAREN
+    (33) print -> . PRINT LPAREN literals RPAREN
     (29) if -> . IF cond THEN statement
     (30) if_else -> . IF cond THEN statement ELSE statement
     (31) while -> . WHILE cond DO statement
@@ -897,7 +890,7 @@ state 48
     write                          shift and go to state 29
     while                          shift and go to state 41
     location                       shift and go to state 30
-    statement                      shift and go to state 76
+    statement                      shift and go to state 75
     print                          shift and go to state 32
     assign                         shift and go to state 43
     if                             shift and go to state 27
@@ -917,9 +910,9 @@ state 50
     (65) location -> . ID
     (66) location -> . ID LBRACKET expression RBRACKET
 
-    ID              shift and go to state 78
+    ID              shift and go to state 77
 
-    location                       shift and go to state 77
+    location                       shift and go to state 76
 
 state 51
 
@@ -950,48 +943,46 @@ state 51
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
     LNOT            shift and go to state 51
-    LPAREN          shift and go to state 60
-    PLUS            shift and go to state 56
+    LPAREN          shift and go to state 59
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    TYPENAME        shift and go to state 62
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
-    cond                           shift and go to state 79
-    location                       shift and go to state 57
-    expression                     shift and go to state 63
+    literal                        shift and go to state 58
+    cond                           shift and go to state 78
+    location                       shift and go to state 56
+    expression                     shift and go to state 62
 
 state 52
 
     (41) expression -> funcall .
 
-    RPAREN          reduce using rule 41 (expression -> funcall .)
     PLUS            reduce using rule 41 (expression -> funcall .)
     MINUS           reduce using rule 41 (expression -> funcall .)
     TIMES           reduce using rule 41 (expression -> funcall .)
     DIVIDE          reduce using rule 41 (expression -> funcall .)
-    RBRACKET        reduce using rule 41 (expression -> funcall .)
+    RPAREN          reduce using rule 41 (expression -> funcall .)
+    COMMA           reduce using rule 41 (expression -> funcall .)
     LT              reduce using rule 41 (expression -> funcall .)
     GT              reduce using rule 41 (expression -> funcall .)
     LE              reduce using rule 41 (expression -> funcall .)
     GE              reduce using rule 41 (expression -> funcall .)
     EQ              reduce using rule 41 (expression -> funcall .)
     NE              reduce using rule 41 (expression -> funcall .)
+    END             reduce using rule 41 (expression -> funcall .)
+    SEMI            reduce using rule 41 (expression -> funcall .)
+    ELSE            reduce using rule 41 (expression -> funcall .)
+    RBRACKET        reduce using rule 41 (expression -> funcall .)
     DO              reduce using rule 41 (expression -> funcall .)
     LAND            reduce using rule 41 (expression -> funcall .)
     LOR             reduce using rule 41 (expression -> funcall .)
     THEN            reduce using rule 41 (expression -> funcall .)
-    COMMA           reduce using rule 41 (expression -> funcall .)
-    END             reduce using rule 41 (expression -> funcall .)
-    SEMI            reduce using rule 41 (expression -> funcall .)
-    ELSE            reduce using rule 41 (expression -> funcall .)
 
 
 state 53
@@ -1000,9 +991,9 @@ state 53
     (52) cond -> cond . LAND cond
     (53) cond -> cond . LOR cond
 
-    DO              shift and go to state 80
-    LAND            shift and go to state 81
-    LOR             shift and go to state 82
+    DO              shift and go to state 79
+    LAND            shift and go to state 80
+    LOR             shift and go to state 81
 
 
 state 54
@@ -1024,49 +1015,21 @@ state 54
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
-    expression                     shift and go to state 83
-    location                       shift and go to state 57
+    literal                        shift and go to state 58
+    expression                     shift and go to state 82
+    location                       shift and go to state 56
 
 state 55
-
-    (64) literal -> STRING .
-
-    LT              reduce using rule 64 (literal -> STRING .)
-    GT              reduce using rule 64 (literal -> STRING .)
-    LE              reduce using rule 64 (literal -> STRING .)
-    GE              reduce using rule 64 (literal -> STRING .)
-    EQ              reduce using rule 64 (literal -> STRING .)
-    NE              reduce using rule 64 (literal -> STRING .)
-    PLUS            reduce using rule 64 (literal -> STRING .)
-    MINUS           reduce using rule 64 (literal -> STRING .)
-    TIMES           reduce using rule 64 (literal -> STRING .)
-    DIVIDE          reduce using rule 64 (literal -> STRING .)
-    RPAREN          reduce using rule 64 (literal -> STRING .)
-    END             reduce using rule 64 (literal -> STRING .)
-    SEMI            reduce using rule 64 (literal -> STRING .)
-    ELSE            reduce using rule 64 (literal -> STRING .)
-    DO              reduce using rule 64 (literal -> STRING .)
-    LAND            reduce using rule 64 (literal -> STRING .)
-    LOR             reduce using rule 64 (literal -> STRING .)
-    THEN            reduce using rule 64 (literal -> STRING .)
-    RBRACKET        reduce using rule 64 (literal -> STRING .)
-    COMMA           reduce using rule 64 (literal -> STRING .)
-
-
-state 56
 
     (38) expression -> PLUS . expression
     (38) expression -> . PLUS expression
@@ -1085,49 +1048,47 @@ state 56
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
-    expression                     shift and go to state 84
-    location                       shift and go to state 57
+    literal                        shift and go to state 58
+    expression                     shift and go to state 83
+    location                       shift and go to state 56
 
-state 57
+state 56
 
     (56) expression -> location .
 
-    RPAREN          reduce using rule 56 (expression -> location .)
     PLUS            reduce using rule 56 (expression -> location .)
     MINUS           reduce using rule 56 (expression -> location .)
     TIMES           reduce using rule 56 (expression -> location .)
     DIVIDE          reduce using rule 56 (expression -> location .)
-    RBRACKET        reduce using rule 56 (expression -> location .)
+    RPAREN          reduce using rule 56 (expression -> location .)
+    COMMA           reduce using rule 56 (expression -> location .)
     LT              reduce using rule 56 (expression -> location .)
     GT              reduce using rule 56 (expression -> location .)
     LE              reduce using rule 56 (expression -> location .)
     GE              reduce using rule 56 (expression -> location .)
     EQ              reduce using rule 56 (expression -> location .)
     NE              reduce using rule 56 (expression -> location .)
+    END             reduce using rule 56 (expression -> location .)
+    SEMI            reduce using rule 56 (expression -> location .)
+    ELSE            reduce using rule 56 (expression -> location .)
+    RBRACKET        reduce using rule 56 (expression -> location .)
     DO              reduce using rule 56 (expression -> location .)
     LAND            reduce using rule 56 (expression -> location .)
     LOR             reduce using rule 56 (expression -> location .)
     THEN            reduce using rule 56 (expression -> location .)
-    COMMA           reduce using rule 56 (expression -> location .)
-    END             reduce using rule 56 (expression -> location .)
-    SEMI            reduce using rule 56 (expression -> location .)
-    ELSE            reduce using rule 56 (expression -> location .)
 
 
-state 58
+state 57
 
     (62) literal -> INTEGER .
 
@@ -1141,45 +1102,45 @@ state 58
     MINUS           reduce using rule 62 (literal -> INTEGER .)
     TIMES           reduce using rule 62 (literal -> INTEGER .)
     DIVIDE          reduce using rule 62 (literal -> INTEGER .)
+    RBRACKET        reduce using rule 62 (literal -> INTEGER .)
     RPAREN          reduce using rule 62 (literal -> INTEGER .)
     END             reduce using rule 62 (literal -> INTEGER .)
     SEMI            reduce using rule 62 (literal -> INTEGER .)
     ELSE            reduce using rule 62 (literal -> INTEGER .)
+    COMMA           reduce using rule 62 (literal -> INTEGER .)
     DO              reduce using rule 62 (literal -> INTEGER .)
     LAND            reduce using rule 62 (literal -> INTEGER .)
     LOR             reduce using rule 62 (literal -> INTEGER .)
     THEN            reduce using rule 62 (literal -> INTEGER .)
-    RBRACKET        reduce using rule 62 (literal -> INTEGER .)
-    COMMA           reduce using rule 62 (literal -> INTEGER .)
 
 
-state 59
+state 58
 
     (57) expression -> literal .
 
-    RPAREN          reduce using rule 57 (expression -> literal .)
     PLUS            reduce using rule 57 (expression -> literal .)
     MINUS           reduce using rule 57 (expression -> literal .)
     TIMES           reduce using rule 57 (expression -> literal .)
     DIVIDE          reduce using rule 57 (expression -> literal .)
-    RBRACKET        reduce using rule 57 (expression -> literal .)
+    RPAREN          reduce using rule 57 (expression -> literal .)
+    COMMA           reduce using rule 57 (expression -> literal .)
     LT              reduce using rule 57 (expression -> literal .)
     GT              reduce using rule 57 (expression -> literal .)
     LE              reduce using rule 57 (expression -> literal .)
     GE              reduce using rule 57 (expression -> literal .)
     EQ              reduce using rule 57 (expression -> literal .)
     NE              reduce using rule 57 (expression -> literal .)
+    END             reduce using rule 57 (expression -> literal .)
+    SEMI            reduce using rule 57 (expression -> literal .)
+    ELSE            reduce using rule 57 (expression -> literal .)
+    RBRACKET        reduce using rule 57 (expression -> literal .)
     DO              reduce using rule 57 (expression -> literal .)
     LAND            reduce using rule 57 (expression -> literal .)
     LOR             reduce using rule 57 (expression -> literal .)
     THEN            reduce using rule 57 (expression -> literal .)
-    COMMA           reduce using rule 57 (expression -> literal .)
-    END             reduce using rule 57 (expression -> literal .)
-    SEMI            reduce using rule 57 (expression -> literal .)
-    ELSE            reduce using rule 57 (expression -> literal .)
 
 
-state 60
+state 59
 
     (55) cond -> LPAREN . cond RPAREN
     (40) expression -> LPAREN . expression RPAREN
@@ -1209,25 +1170,23 @@ state 60
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
     LNOT            shift and go to state 51
-    LPAREN          shift and go to state 60
-    PLUS            shift and go to state 56
+    LPAREN          shift and go to state 59
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    TYPENAME        shift and go to state 62
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
-    cond                           shift and go to state 85
-    location                       shift and go to state 57
-    expression                     shift and go to state 86
+    literal                        shift and go to state 58
+    cond                           shift and go to state 84
+    location                       shift and go to state 56
+    expression                     shift and go to state 85
 
-state 61
+state 60
 
     (63) literal -> FLOAT .
 
@@ -1241,26 +1200,26 @@ state 61
     MINUS           reduce using rule 63 (literal -> FLOAT .)
     TIMES           reduce using rule 63 (literal -> FLOAT .)
     DIVIDE          reduce using rule 63 (literal -> FLOAT .)
+    RBRACKET        reduce using rule 63 (literal -> FLOAT .)
     RPAREN          reduce using rule 63 (literal -> FLOAT .)
     END             reduce using rule 63 (literal -> FLOAT .)
     SEMI            reduce using rule 63 (literal -> FLOAT .)
     ELSE            reduce using rule 63 (literal -> FLOAT .)
+    COMMA           reduce using rule 63 (literal -> FLOAT .)
     DO              reduce using rule 63 (literal -> FLOAT .)
     LAND            reduce using rule 63 (literal -> FLOAT .)
     LOR             reduce using rule 63 (literal -> FLOAT .)
     THEN            reduce using rule 63 (literal -> FLOAT .)
-    RBRACKET        reduce using rule 63 (literal -> FLOAT .)
-    COMMA           reduce using rule 63 (literal -> FLOAT .)
 
 
-state 62
+state 61
 
     (58) expression -> TYPENAME . LPAREN expression RPAREN
 
-    LPAREN          shift and go to state 87
+    LPAREN          shift and go to state 86
 
 
-state 63
+state 62
 
     (46) cond -> expression . LT expression
     (47) cond -> expression . GT expression
@@ -1273,32 +1232,28 @@ state 63
     (44) expression -> expression . TIMES expression
     (45) expression -> expression . DIVIDE expression
 
-    LT              shift and go to state 91
-    GT              shift and go to state 88
-    LE              shift and go to state 94
-    GE              shift and go to state 93
-    EQ              shift and go to state 90
-    NE              shift and go to state 92
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    LT              shift and go to state 90
+    GT              shift and go to state 87
+    LE              shift and go to state 93
+    GE              shift and go to state 92
+    EQ              shift and go to state 89
+    NE              shift and go to state 91
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
+
+state 63
+
+    (33) print -> PRINT LPAREN . literals RPAREN
+    (64) literals -> . STRING
+
+    STRING          shift and go to state 98
+
+    literals                       shift and go to state 97
 
 state 64
-
-    (33) print -> PRINT LPAREN . literal RPAREN
-    (62) literal -> . INTEGER
-    (63) literal -> . FLOAT
-    (64) literal -> . STRING
-
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
-
-    literal                        shift and go to state 98
-
-state 65
 
     (3) statement -> BEGIN statements . END
     (5) statements -> statements . SEMI statement
@@ -1307,7 +1262,7 @@ state 65
     SEMI            shift and go to state 48
 
 
-state 66
+state 65
 
     (32) assign -> location ASSIGN . expression
     (38) expression -> . PLUS expression
@@ -1326,23 +1281,21 @@ state 66
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 100
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 67
+state 66
 
     (34) write -> WRITE LPAREN . expression RPAREN
     (38) expression -> . PLUS expression
@@ -1361,23 +1314,21 @@ state 67
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 101
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 68
+state 67
 
     (66) location -> ID LBRACKET . expression RBRACKET
     (38) expression -> . PLUS expression
@@ -1396,23 +1347,21 @@ state 68
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 102
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 69
+state 68
 
     (37) funcall -> ID LPAREN . exprlist RPAREN
     (59) exprlist -> . exprlist COMMA expression
@@ -1435,27 +1384,25 @@ state 69
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     RPAREN          reduce using rule 67 (empty -> .)
     COMMA           reduce using rule 67 (empty -> .)
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
-    location                       shift and go to state 57
+    literal                        shift and go to state 58
+    location                       shift and go to state 56
     expression                     shift and go to state 104
     exprlist                       shift and go to state 103
     empty                          shift and go to state 105
 
-state 70
+state 69
 
     (29) if -> IF cond . THEN statement
     (30) if_else -> IF cond . THEN statement ELSE statement
@@ -1463,11 +1410,11 @@ state 70
     (53) cond -> cond . LOR cond
 
     THEN            shift and go to state 106
-    LAND            shift and go to state 81
-    LOR             shift and go to state 82
+    LAND            shift and go to state 80
+    LOR             shift and go to state 81
 
 
-state 71
+state 70
 
     (40) expression -> LPAREN . expression RPAREN
     (38) expression -> . PLUS expression
@@ -1486,23 +1433,21 @@ state 71
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 107
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 72
+state 71
 
     (35) return -> RETURN expression .
     (42) expression -> expression . PLUS expression
@@ -1513,13 +1458,13 @@ state 72
     END             reduce using rule 35 (return -> RETURN expression .)
     SEMI            reduce using rule 35 (return -> RETURN expression .)
     ELSE            reduce using rule 35 (return -> RETURN expression .)
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
-state 73
+state 72
 
     (19) local -> ID COLON TYPENAME . SEMI
     (20) local -> ID COLON TYPENAME . LBRACKET literal RBRACKET SEMI
@@ -1528,7 +1473,7 @@ state 73
     LBRACKET        shift and go to state 109
 
 
-state 74
+state 73
 
     (22) function -> FUNC ID LPAREN parameters RPAREN locals BEGIN statements . END
     (5) statements -> statements . SEMI statement
@@ -1537,14 +1482,14 @@ state 74
     SEMI            shift and go to state 48
 
 
-state 75
+state 74
 
     (28) parm_declaration -> ID COLON TYPENAME LBRACKET literal . RBRACKET
 
     RBRACKET        shift and go to state 111
 
 
-state 76
+state 75
 
     (5) statements -> statements SEMI statement .
 
@@ -1552,23 +1497,23 @@ state 76
     SEMI            reduce using rule 5 (statements -> statements SEMI statement .)
 
 
-state 77
+state 76
 
     (36) read -> READ LPAREN location . RPAREN
 
     RPAREN          shift and go to state 112
 
 
-state 78
+state 77
 
     (65) location -> ID .
     (66) location -> ID . LBRACKET expression RBRACKET
 
     RPAREN          reduce using rule 65 (location -> ID .)
-    LBRACKET        shift and go to state 68
+    LBRACKET        shift and go to state 67
 
 
-state 79
+state 78
 
     (54) cond -> LNOT cond .
     (52) cond -> cond . LAND cond
@@ -1580,11 +1525,11 @@ state 79
     THEN            reduce using rule 54 (cond -> LNOT cond .)
     RPAREN          reduce using rule 54 (cond -> LNOT cond .)
 
-  ! LAND            [ shift and go to state 81 ]
-  ! LOR             [ shift and go to state 82 ]
+  ! LAND            [ shift and go to state 80 ]
+  ! LOR             [ shift and go to state 81 ]
 
 
-state 80
+state 79
 
     (31) while -> WHILE cond DO . statement
     (3) statement -> . BEGIN statements END
@@ -1600,7 +1545,7 @@ state 80
     (15) statement -> . funcall
     (16) statement -> . return
     (32) assign -> . location ASSIGN expression
-    (33) print -> . PRINT LPAREN literal RPAREN
+    (33) print -> . PRINT LPAREN literals RPAREN
     (29) if -> . IF cond THEN statement
     (30) if_else -> . IF cond THEN statement ELSE statement
     (31) while -> . WHILE cond DO statement
@@ -1634,7 +1579,7 @@ state 80
     assign                         shift and go to state 43
     if                             shift and go to state 27
 
-state 81
+state 80
 
     (52) cond -> cond LAND . cond
     (46) cond -> . expression LT expression
@@ -1663,25 +1608,23 @@ state 81
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
     LNOT            shift and go to state 51
-    LPAREN          shift and go to state 60
-    PLUS            shift and go to state 56
+    LPAREN          shift and go to state 59
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    TYPENAME        shift and go to state 62
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     cond                           shift and go to state 114
-    location                       shift and go to state 57
-    expression                     shift and go to state 63
+    location                       shift and go to state 56
+    expression                     shift and go to state 62
 
-state 82
+state 81
 
     (53) cond -> cond LOR . cond
     (46) cond -> . expression LT expression
@@ -1710,25 +1653,23 @@ state 82
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
     LNOT            shift and go to state 51
-    LPAREN          shift and go to state 60
-    PLUS            shift and go to state 56
+    LPAREN          shift and go to state 59
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    TYPENAME        shift and go to state 62
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     cond                           shift and go to state 115
-    location                       shift and go to state 57
-    expression                     shift and go to state 63
+    location                       shift and go to state 56
+    expression                     shift and go to state 62
 
-state 83
+state 82
 
     (39) expression -> MINUS expression .
     (42) expression -> expression . PLUS expression
@@ -1736,34 +1677,34 @@ state 83
     (44) expression -> expression . TIMES expression
     (45) expression -> expression . DIVIDE expression
 
-    RPAREN          reduce using rule 39 (expression -> MINUS expression .)
     PLUS            reduce using rule 39 (expression -> MINUS expression .)
     MINUS           reduce using rule 39 (expression -> MINUS expression .)
     TIMES           reduce using rule 39 (expression -> MINUS expression .)
     DIVIDE          reduce using rule 39 (expression -> MINUS expression .)
-    RBRACKET        reduce using rule 39 (expression -> MINUS expression .)
+    RPAREN          reduce using rule 39 (expression -> MINUS expression .)
+    COMMA           reduce using rule 39 (expression -> MINUS expression .)
     LT              reduce using rule 39 (expression -> MINUS expression .)
     GT              reduce using rule 39 (expression -> MINUS expression .)
     LE              reduce using rule 39 (expression -> MINUS expression .)
     GE              reduce using rule 39 (expression -> MINUS expression .)
     EQ              reduce using rule 39 (expression -> MINUS expression .)
     NE              reduce using rule 39 (expression -> MINUS expression .)
+    END             reduce using rule 39 (expression -> MINUS expression .)
+    SEMI            reduce using rule 39 (expression -> MINUS expression .)
+    ELSE            reduce using rule 39 (expression -> MINUS expression .)
+    RBRACKET        reduce using rule 39 (expression -> MINUS expression .)
     DO              reduce using rule 39 (expression -> MINUS expression .)
     LAND            reduce using rule 39 (expression -> MINUS expression .)
     LOR             reduce using rule 39 (expression -> MINUS expression .)
     THEN            reduce using rule 39 (expression -> MINUS expression .)
-    COMMA           reduce using rule 39 (expression -> MINUS expression .)
-    END             reduce using rule 39 (expression -> MINUS expression .)
-    SEMI            reduce using rule 39 (expression -> MINUS expression .)
-    ELSE            reduce using rule 39 (expression -> MINUS expression .)
 
-  ! PLUS            [ shift and go to state 95 ]
-  ! MINUS           [ shift and go to state 97 ]
-  ! TIMES           [ shift and go to state 96 ]
-  ! DIVIDE          [ shift and go to state 89 ]
+  ! PLUS            [ shift and go to state 94 ]
+  ! MINUS           [ shift and go to state 96 ]
+  ! TIMES           [ shift and go to state 95 ]
+  ! DIVIDE          [ shift and go to state 88 ]
 
 
-state 84
+state 83
 
     (38) expression -> PLUS expression .
     (42) expression -> expression . PLUS expression
@@ -1771,45 +1712,45 @@ state 84
     (44) expression -> expression . TIMES expression
     (45) expression -> expression . DIVIDE expression
 
-    RPAREN          reduce using rule 38 (expression -> PLUS expression .)
     PLUS            reduce using rule 38 (expression -> PLUS expression .)
     MINUS           reduce using rule 38 (expression -> PLUS expression .)
     TIMES           reduce using rule 38 (expression -> PLUS expression .)
     DIVIDE          reduce using rule 38 (expression -> PLUS expression .)
-    RBRACKET        reduce using rule 38 (expression -> PLUS expression .)
+    RPAREN          reduce using rule 38 (expression -> PLUS expression .)
+    COMMA           reduce using rule 38 (expression -> PLUS expression .)
     LT              reduce using rule 38 (expression -> PLUS expression .)
     GT              reduce using rule 38 (expression -> PLUS expression .)
     LE              reduce using rule 38 (expression -> PLUS expression .)
     GE              reduce using rule 38 (expression -> PLUS expression .)
     EQ              reduce using rule 38 (expression -> PLUS expression .)
     NE              reduce using rule 38 (expression -> PLUS expression .)
+    END             reduce using rule 38 (expression -> PLUS expression .)
+    SEMI            reduce using rule 38 (expression -> PLUS expression .)
+    ELSE            reduce using rule 38 (expression -> PLUS expression .)
+    RBRACKET        reduce using rule 38 (expression -> PLUS expression .)
     DO              reduce using rule 38 (expression -> PLUS expression .)
     LAND            reduce using rule 38 (expression -> PLUS expression .)
     LOR             reduce using rule 38 (expression -> PLUS expression .)
     THEN            reduce using rule 38 (expression -> PLUS expression .)
-    COMMA           reduce using rule 38 (expression -> PLUS expression .)
-    END             reduce using rule 38 (expression -> PLUS expression .)
-    SEMI            reduce using rule 38 (expression -> PLUS expression .)
-    ELSE            reduce using rule 38 (expression -> PLUS expression .)
 
-  ! PLUS            [ shift and go to state 95 ]
-  ! MINUS           [ shift and go to state 97 ]
-  ! TIMES           [ shift and go to state 96 ]
-  ! DIVIDE          [ shift and go to state 89 ]
+  ! PLUS            [ shift and go to state 94 ]
+  ! MINUS           [ shift and go to state 96 ]
+  ! TIMES           [ shift and go to state 95 ]
+  ! DIVIDE          [ shift and go to state 88 ]
 
 
-state 85
+state 84
 
     (55) cond -> LPAREN cond . RPAREN
     (52) cond -> cond . LAND cond
     (53) cond -> cond . LOR cond
 
     RPAREN          shift and go to state 116
-    LAND            shift and go to state 81
-    LOR             shift and go to state 82
+    LAND            shift and go to state 80
+    LOR             shift and go to state 81
 
 
-state 86
+state 85
 
     (40) expression -> LPAREN expression . RPAREN
     (46) cond -> expression . LT expression
@@ -1824,19 +1765,19 @@ state 86
     (45) expression -> expression . DIVIDE expression
 
     RPAREN          shift and go to state 117
-    LT              shift and go to state 91
-    GT              shift and go to state 88
-    LE              shift and go to state 94
-    GE              shift and go to state 93
-    EQ              shift and go to state 90
-    NE              shift and go to state 92
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    LT              shift and go to state 90
+    GT              shift and go to state 87
+    LE              shift and go to state 93
+    GE              shift and go to state 92
+    EQ              shift and go to state 89
+    NE              shift and go to state 91
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
-state 87
+state 86
 
     (58) expression -> TYPENAME LPAREN . expression RPAREN
     (38) expression -> . PLUS expression
@@ -1855,23 +1796,21 @@ state 87
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 118
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 88
+state 87
 
     (47) cond -> expression GT . expression
     (38) expression -> . PLUS expression
@@ -1890,23 +1829,21 @@ state 88
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 119
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 89
+state 88
 
     (45) expression -> expression DIVIDE . expression
     (38) expression -> . PLUS expression
@@ -1925,23 +1862,21 @@ state 89
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 120
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 90
+state 89
 
     (50) cond -> expression EQ . expression
     (38) expression -> . PLUS expression
@@ -1960,23 +1895,21 @@ state 90
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 121
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 91
+state 90
 
     (46) cond -> expression LT . expression
     (38) expression -> . PLUS expression
@@ -1995,23 +1928,21 @@ state 91
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 122
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 92
+state 91
 
     (51) cond -> expression NE . expression
     (38) expression -> . PLUS expression
@@ -2030,23 +1961,21 @@ state 92
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 123
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 93
+state 92
 
     (49) cond -> expression GE . expression
     (38) expression -> . PLUS expression
@@ -2065,23 +1994,21 @@ state 93
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 124
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 94
+state 93
 
     (48) cond -> expression LE . expression
     (38) expression -> . PLUS expression
@@ -2100,23 +2027,21 @@ state 94
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 125
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 95
+state 94
 
     (42) expression -> expression PLUS . expression
     (38) expression -> . PLUS expression
@@ -2135,23 +2060,21 @@ state 95
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 126
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 96
+state 95
 
     (44) expression -> expression TIMES . expression
     (38) expression -> . PLUS expression
@@ -2170,23 +2093,21 @@ state 96
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 127
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
-state 97
+state 96
 
     (43) expression -> expression MINUS . expression
     (38) expression -> . PLUS expression
@@ -2205,27 +2126,32 @@ state 97
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 128
-    location                       shift and go to state 57
+    location                       shift and go to state 56
+
+state 97
+
+    (33) print -> PRINT LPAREN literals . RPAREN
+
+    RPAREN          shift and go to state 129
+
 
 state 98
 
-    (33) print -> PRINT LPAREN literal . RPAREN
+    (64) literals -> STRING .
 
-    RPAREN          shift and go to state 129
+    RPAREN          reduce using rule 64 (literals -> STRING .)
 
 
 state 99
@@ -2248,10 +2174,10 @@ state 100
     END             reduce using rule 32 (assign -> location ASSIGN expression .)
     SEMI            reduce using rule 32 (assign -> location ASSIGN expression .)
     ELSE            reduce using rule 32 (assign -> location ASSIGN expression .)
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 101
@@ -2263,10 +2189,10 @@ state 101
     (45) expression -> expression . DIVIDE expression
 
     RPAREN          shift and go to state 130
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 102
@@ -2278,10 +2204,10 @@ state 102
     (45) expression -> expression . DIVIDE expression
 
     RBRACKET        shift and go to state 131
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 103
@@ -2303,10 +2229,10 @@ state 104
 
     RPAREN          reduce using rule 60 (exprlist -> expression .)
     COMMA           reduce using rule 60 (exprlist -> expression .)
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 105
@@ -2334,7 +2260,7 @@ state 106
     (15) statement -> . funcall
     (16) statement -> . return
     (32) assign -> . location ASSIGN expression
-    (33) print -> . PRINT LPAREN literal RPAREN
+    (33) print -> . PRINT LPAREN literals RPAREN
     (29) if -> . IF cond THEN statement
     (30) if_else -> . IF cond THEN statement ELSE statement
     (31) while -> . WHILE cond DO statement
@@ -2377,10 +2303,10 @@ state 107
     (45) expression -> expression . DIVIDE expression
 
     RPAREN          shift and go to state 117
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 108
@@ -2397,11 +2323,9 @@ state 109
     (20) local -> ID COLON TYPENAME LBRACKET . literal RBRACKET SEMI
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     literal                        shift and go to state 135
 
@@ -2452,8 +2376,8 @@ state 114
     THEN            reduce using rule 52 (cond -> cond LAND cond .)
     RPAREN          reduce using rule 52 (cond -> cond LAND cond .)
 
-  ! LAND            [ shift and go to state 81 ]
-  ! LOR             [ shift and go to state 82 ]
+  ! LAND            [ shift and go to state 80 ]
+  ! LOR             [ shift and go to state 81 ]
 
 
 state 115
@@ -2466,10 +2390,10 @@ state 115
     LOR             reduce using rule 53 (cond -> cond LOR cond .)
     THEN            reduce using rule 53 (cond -> cond LOR cond .)
     RPAREN          reduce using rule 53 (cond -> cond LOR cond .)
-    LAND            shift and go to state 81
+    LAND            shift and go to state 80
 
   ! LAND            [ reduce using rule 53 (cond -> cond LOR cond .) ]
-  ! LOR             [ shift and go to state 82 ]
+  ! LOR             [ shift and go to state 81 ]
 
 
 state 116
@@ -2487,26 +2411,26 @@ state 117
 
     (40) expression -> LPAREN expression RPAREN .
 
-    RPAREN          reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     PLUS            reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     MINUS           reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     TIMES           reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     DIVIDE          reduce using rule 40 (expression -> LPAREN expression RPAREN .)
-    RBRACKET        reduce using rule 40 (expression -> LPAREN expression RPAREN .)
+    RPAREN          reduce using rule 40 (expression -> LPAREN expression RPAREN .)
+    COMMA           reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     LT              reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     GT              reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     LE              reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     GE              reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     EQ              reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     NE              reduce using rule 40 (expression -> LPAREN expression RPAREN .)
+    END             reduce using rule 40 (expression -> LPAREN expression RPAREN .)
+    SEMI            reduce using rule 40 (expression -> LPAREN expression RPAREN .)
+    ELSE            reduce using rule 40 (expression -> LPAREN expression RPAREN .)
+    RBRACKET        reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     DO              reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     LAND            reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     LOR             reduce using rule 40 (expression -> LPAREN expression RPAREN .)
     THEN            reduce using rule 40 (expression -> LPAREN expression RPAREN .)
-    COMMA           reduce using rule 40 (expression -> LPAREN expression RPAREN .)
-    END             reduce using rule 40 (expression -> LPAREN expression RPAREN .)
-    SEMI            reduce using rule 40 (expression -> LPAREN expression RPAREN .)
-    ELSE            reduce using rule 40 (expression -> LPAREN expression RPAREN .)
 
 
 state 118
@@ -2518,10 +2442,10 @@ state 118
     (45) expression -> expression . DIVIDE expression
 
     RPAREN          shift and go to state 136
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 119
@@ -2537,10 +2461,10 @@ state 119
     LOR             reduce using rule 47 (cond -> expression GT expression .)
     THEN            reduce using rule 47 (cond -> expression GT expression .)
     RPAREN          reduce using rule 47 (cond -> expression GT expression .)
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 120
@@ -2551,31 +2475,31 @@ state 120
     (44) expression -> expression . TIMES expression
     (45) expression -> expression . DIVIDE expression
 
-    RPAREN          reduce using rule 45 (expression -> expression DIVIDE expression .)
     PLUS            reduce using rule 45 (expression -> expression DIVIDE expression .)
     MINUS           reduce using rule 45 (expression -> expression DIVIDE expression .)
     TIMES           reduce using rule 45 (expression -> expression DIVIDE expression .)
     DIVIDE          reduce using rule 45 (expression -> expression DIVIDE expression .)
-    RBRACKET        reduce using rule 45 (expression -> expression DIVIDE expression .)
+    RPAREN          reduce using rule 45 (expression -> expression DIVIDE expression .)
+    COMMA           reduce using rule 45 (expression -> expression DIVIDE expression .)
     LT              reduce using rule 45 (expression -> expression DIVIDE expression .)
     GT              reduce using rule 45 (expression -> expression DIVIDE expression .)
     LE              reduce using rule 45 (expression -> expression DIVIDE expression .)
     GE              reduce using rule 45 (expression -> expression DIVIDE expression .)
     EQ              reduce using rule 45 (expression -> expression DIVIDE expression .)
     NE              reduce using rule 45 (expression -> expression DIVIDE expression .)
+    END             reduce using rule 45 (expression -> expression DIVIDE expression .)
+    SEMI            reduce using rule 45 (expression -> expression DIVIDE expression .)
+    ELSE            reduce using rule 45 (expression -> expression DIVIDE expression .)
+    RBRACKET        reduce using rule 45 (expression -> expression DIVIDE expression .)
     DO              reduce using rule 45 (expression -> expression DIVIDE expression .)
     LAND            reduce using rule 45 (expression -> expression DIVIDE expression .)
     LOR             reduce using rule 45 (expression -> expression DIVIDE expression .)
     THEN            reduce using rule 45 (expression -> expression DIVIDE expression .)
-    COMMA           reduce using rule 45 (expression -> expression DIVIDE expression .)
-    END             reduce using rule 45 (expression -> expression DIVIDE expression .)
-    SEMI            reduce using rule 45 (expression -> expression DIVIDE expression .)
-    ELSE            reduce using rule 45 (expression -> expression DIVIDE expression .)
 
-  ! PLUS            [ shift and go to state 95 ]
-  ! MINUS           [ shift and go to state 97 ]
-  ! TIMES           [ shift and go to state 96 ]
-  ! DIVIDE          [ shift and go to state 89 ]
+  ! PLUS            [ shift and go to state 94 ]
+  ! MINUS           [ shift and go to state 96 ]
+  ! TIMES           [ shift and go to state 95 ]
+  ! DIVIDE          [ shift and go to state 88 ]
 
 
 state 121
@@ -2591,10 +2515,10 @@ state 121
     LOR             reduce using rule 50 (cond -> expression EQ expression .)
     THEN            reduce using rule 50 (cond -> expression EQ expression .)
     RPAREN          reduce using rule 50 (cond -> expression EQ expression .)
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 122
@@ -2610,10 +2534,10 @@ state 122
     LOR             reduce using rule 46 (cond -> expression LT expression .)
     THEN            reduce using rule 46 (cond -> expression LT expression .)
     RPAREN          reduce using rule 46 (cond -> expression LT expression .)
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 123
@@ -2629,10 +2553,10 @@ state 123
     LOR             reduce using rule 51 (cond -> expression NE expression .)
     THEN            reduce using rule 51 (cond -> expression NE expression .)
     RPAREN          reduce using rule 51 (cond -> expression NE expression .)
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 124
@@ -2648,10 +2572,10 @@ state 124
     LOR             reduce using rule 49 (cond -> expression GE expression .)
     THEN            reduce using rule 49 (cond -> expression GE expression .)
     RPAREN          reduce using rule 49 (cond -> expression GE expression .)
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 125
@@ -2667,10 +2591,10 @@ state 125
     LOR             reduce using rule 48 (cond -> expression LE expression .)
     THEN            reduce using rule 48 (cond -> expression LE expression .)
     RPAREN          reduce using rule 48 (cond -> expression LE expression .)
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 126
@@ -2681,31 +2605,31 @@ state 126
     (44) expression -> expression . TIMES expression
     (45) expression -> expression . DIVIDE expression
 
-    RPAREN          reduce using rule 42 (expression -> expression PLUS expression .)
     PLUS            reduce using rule 42 (expression -> expression PLUS expression .)
     MINUS           reduce using rule 42 (expression -> expression PLUS expression .)
-    RBRACKET        reduce using rule 42 (expression -> expression PLUS expression .)
+    RPAREN          reduce using rule 42 (expression -> expression PLUS expression .)
+    COMMA           reduce using rule 42 (expression -> expression PLUS expression .)
     LT              reduce using rule 42 (expression -> expression PLUS expression .)
     GT              reduce using rule 42 (expression -> expression PLUS expression .)
     LE              reduce using rule 42 (expression -> expression PLUS expression .)
     GE              reduce using rule 42 (expression -> expression PLUS expression .)
     EQ              reduce using rule 42 (expression -> expression PLUS expression .)
     NE              reduce using rule 42 (expression -> expression PLUS expression .)
+    END             reduce using rule 42 (expression -> expression PLUS expression .)
+    SEMI            reduce using rule 42 (expression -> expression PLUS expression .)
+    ELSE            reduce using rule 42 (expression -> expression PLUS expression .)
+    RBRACKET        reduce using rule 42 (expression -> expression PLUS expression .)
     DO              reduce using rule 42 (expression -> expression PLUS expression .)
     LAND            reduce using rule 42 (expression -> expression PLUS expression .)
     LOR             reduce using rule 42 (expression -> expression PLUS expression .)
     THEN            reduce using rule 42 (expression -> expression PLUS expression .)
-    COMMA           reduce using rule 42 (expression -> expression PLUS expression .)
-    END             reduce using rule 42 (expression -> expression PLUS expression .)
-    SEMI            reduce using rule 42 (expression -> expression PLUS expression .)
-    ELSE            reduce using rule 42 (expression -> expression PLUS expression .)
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
   ! TIMES           [ reduce using rule 42 (expression -> expression PLUS expression .) ]
   ! DIVIDE          [ reduce using rule 42 (expression -> expression PLUS expression .) ]
-  ! PLUS            [ shift and go to state 95 ]
-  ! MINUS           [ shift and go to state 97 ]
+  ! PLUS            [ shift and go to state 94 ]
+  ! MINUS           [ shift and go to state 96 ]
 
 
 state 127
@@ -2716,31 +2640,31 @@ state 127
     (44) expression -> expression . TIMES expression
     (45) expression -> expression . DIVIDE expression
 
-    RPAREN          reduce using rule 44 (expression -> expression TIMES expression .)
     PLUS            reduce using rule 44 (expression -> expression TIMES expression .)
     MINUS           reduce using rule 44 (expression -> expression TIMES expression .)
     TIMES           reduce using rule 44 (expression -> expression TIMES expression .)
     DIVIDE          reduce using rule 44 (expression -> expression TIMES expression .)
-    RBRACKET        reduce using rule 44 (expression -> expression TIMES expression .)
+    RPAREN          reduce using rule 44 (expression -> expression TIMES expression .)
+    COMMA           reduce using rule 44 (expression -> expression TIMES expression .)
     LT              reduce using rule 44 (expression -> expression TIMES expression .)
     GT              reduce using rule 44 (expression -> expression TIMES expression .)
     LE              reduce using rule 44 (expression -> expression TIMES expression .)
     GE              reduce using rule 44 (expression -> expression TIMES expression .)
     EQ              reduce using rule 44 (expression -> expression TIMES expression .)
     NE              reduce using rule 44 (expression -> expression TIMES expression .)
+    END             reduce using rule 44 (expression -> expression TIMES expression .)
+    SEMI            reduce using rule 44 (expression -> expression TIMES expression .)
+    ELSE            reduce using rule 44 (expression -> expression TIMES expression .)
+    RBRACKET        reduce using rule 44 (expression -> expression TIMES expression .)
     DO              reduce using rule 44 (expression -> expression TIMES expression .)
     LAND            reduce using rule 44 (expression -> expression TIMES expression .)
     LOR             reduce using rule 44 (expression -> expression TIMES expression .)
     THEN            reduce using rule 44 (expression -> expression TIMES expression .)
-    COMMA           reduce using rule 44 (expression -> expression TIMES expression .)
-    END             reduce using rule 44 (expression -> expression TIMES expression .)
-    SEMI            reduce using rule 44 (expression -> expression TIMES expression .)
-    ELSE            reduce using rule 44 (expression -> expression TIMES expression .)
 
-  ! PLUS            [ shift and go to state 95 ]
-  ! MINUS           [ shift and go to state 97 ]
-  ! TIMES           [ shift and go to state 96 ]
-  ! DIVIDE          [ shift and go to state 89 ]
+  ! PLUS            [ shift and go to state 94 ]
+  ! MINUS           [ shift and go to state 96 ]
+  ! TIMES           [ shift and go to state 95 ]
+  ! DIVIDE          [ shift and go to state 88 ]
 
 
 state 128
@@ -2751,40 +2675,40 @@ state 128
     (44) expression -> expression . TIMES expression
     (45) expression -> expression . DIVIDE expression
 
-    RPAREN          reduce using rule 43 (expression -> expression MINUS expression .)
     PLUS            reduce using rule 43 (expression -> expression MINUS expression .)
     MINUS           reduce using rule 43 (expression -> expression MINUS expression .)
-    RBRACKET        reduce using rule 43 (expression -> expression MINUS expression .)
+    RPAREN          reduce using rule 43 (expression -> expression MINUS expression .)
+    COMMA           reduce using rule 43 (expression -> expression MINUS expression .)
     LT              reduce using rule 43 (expression -> expression MINUS expression .)
     GT              reduce using rule 43 (expression -> expression MINUS expression .)
     LE              reduce using rule 43 (expression -> expression MINUS expression .)
     GE              reduce using rule 43 (expression -> expression MINUS expression .)
     EQ              reduce using rule 43 (expression -> expression MINUS expression .)
     NE              reduce using rule 43 (expression -> expression MINUS expression .)
+    END             reduce using rule 43 (expression -> expression MINUS expression .)
+    SEMI            reduce using rule 43 (expression -> expression MINUS expression .)
+    ELSE            reduce using rule 43 (expression -> expression MINUS expression .)
+    RBRACKET        reduce using rule 43 (expression -> expression MINUS expression .)
     DO              reduce using rule 43 (expression -> expression MINUS expression .)
     LAND            reduce using rule 43 (expression -> expression MINUS expression .)
     LOR             reduce using rule 43 (expression -> expression MINUS expression .)
     THEN            reduce using rule 43 (expression -> expression MINUS expression .)
-    COMMA           reduce using rule 43 (expression -> expression MINUS expression .)
-    END             reduce using rule 43 (expression -> expression MINUS expression .)
-    SEMI            reduce using rule 43 (expression -> expression MINUS expression .)
-    ELSE            reduce using rule 43 (expression -> expression MINUS expression .)
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
   ! TIMES           [ reduce using rule 43 (expression -> expression MINUS expression .) ]
   ! DIVIDE          [ reduce using rule 43 (expression -> expression MINUS expression .) ]
-  ! PLUS            [ shift and go to state 95 ]
-  ! MINUS           [ shift and go to state 97 ]
+  ! PLUS            [ shift and go to state 94 ]
+  ! MINUS           [ shift and go to state 96 ]
 
 
 state 129
 
-    (33) print -> PRINT LPAREN literal RPAREN .
+    (33) print -> PRINT LPAREN literals RPAREN .
 
-    END             reduce using rule 33 (print -> PRINT LPAREN literal RPAREN .)
-    SEMI            reduce using rule 33 (print -> PRINT LPAREN literal RPAREN .)
-    ELSE            reduce using rule 33 (print -> PRINT LPAREN literal RPAREN .)
+    END             reduce using rule 33 (print -> PRINT LPAREN literals RPAREN .)
+    SEMI            reduce using rule 33 (print -> PRINT LPAREN literals RPAREN .)
+    ELSE            reduce using rule 33 (print -> PRINT LPAREN literals RPAREN .)
 
 
 state 130
@@ -2804,23 +2728,23 @@ state 131
     MINUS           reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     TIMES           reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     DIVIDE          reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
-    DO              reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
-    LAND            reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
-    LOR             reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
-    THEN            reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
-    RPAREN          reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     LT              reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     GT              reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     LE              reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     GE              reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     EQ              reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     NE              reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
-    ASSIGN          reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     END             reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     SEMI            reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     ELSE            reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
+    RPAREN          reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     RBRACKET        reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
     COMMA           reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
+    DO              reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
+    LAND            reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
+    LOR             reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
+    THEN            reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
+    ASSIGN          reduce using rule 66 (location -> ID LBRACKET expression RBRACKET .)
 
 
 state 132
@@ -2836,6 +2760,7 @@ state 132
     LOR             reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
     THEN            reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
     RPAREN          reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
+    RBRACKET        reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
     LT              reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
     GT              reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
     LE              reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
@@ -2845,7 +2770,6 @@ state 132
     END             reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
     SEMI            reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
     ELSE            reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
-    RBRACKET        reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
     COMMA           reduce using rule 37 (funcall -> ID LPAREN exprlist RPAREN .)
 
 
@@ -2868,21 +2792,19 @@ state 133
     (66) location -> . ID LBRACKET expression RBRACKET
     (62) literal -> . INTEGER
     (63) literal -> . FLOAT
-    (64) literal -> . STRING
 
-    PLUS            shift and go to state 56
+    PLUS            shift and go to state 55
     MINUS           shift and go to state 54
-    LPAREN          shift and go to state 71
-    TYPENAME        shift and go to state 62
+    LPAREN          shift and go to state 70
+    TYPENAME        shift and go to state 61
     ID              shift and go to state 37
-    INTEGER         shift and go to state 58
-    FLOAT           shift and go to state 61
-    STRING          shift and go to state 55
+    INTEGER         shift and go to state 57
+    FLOAT           shift and go to state 60
 
     funcall                        shift and go to state 52
-    literal                        shift and go to state 59
+    literal                        shift and go to state 58
     expression                     shift and go to state 137
-    location                       shift and go to state 57
+    location                       shift and go to state 56
 
 state 134
 
@@ -2907,26 +2829,26 @@ state 136
 
     (58) expression -> TYPENAME LPAREN expression RPAREN .
 
-    RPAREN          reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     PLUS            reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     MINUS           reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     TIMES           reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     DIVIDE          reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
-    RBRACKET        reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
+    RPAREN          reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
+    COMMA           reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     LT              reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     GT              reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     LE              reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     GE              reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     EQ              reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     NE              reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
+    END             reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
+    SEMI            reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
+    ELSE            reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
+    RBRACKET        reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     DO              reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     LAND            reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     LOR             reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
     THEN            reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
-    COMMA           reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
-    END             reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
-    SEMI            reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
-    ELSE            reduce using rule 58 (expression -> TYPENAME LPAREN expression RPAREN .)
 
 
 state 137
@@ -2939,10 +2861,10 @@ state 137
 
     RPAREN          reduce using rule 59 (exprlist -> exprlist COMMA expression .)
     COMMA           reduce using rule 59 (exprlist -> exprlist COMMA expression .)
-    PLUS            shift and go to state 95
-    MINUS           shift and go to state 97
-    TIMES           shift and go to state 96
-    DIVIDE          shift and go to state 89
+    PLUS            shift and go to state 94
+    MINUS           shift and go to state 96
+    TIMES           shift and go to state 95
+    DIVIDE          shift and go to state 88
 
 
 state 138
@@ -2961,7 +2883,7 @@ state 138
     (15) statement -> . funcall
     (16) statement -> . return
     (32) assign -> . location ASSIGN expression
-    (33) print -> . PRINT LPAREN literal RPAREN
+    (33) print -> . PRINT LPAREN literals RPAREN
     (29) if -> . IF cond THEN statement
     (30) if_else -> . IF cond THEN statement ELSE statement
     (31) while -> . WHILE cond DO statement

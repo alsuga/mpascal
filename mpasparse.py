@@ -178,7 +178,7 @@ def p_assign(p):
 
 def p_print(p):
     '''
-    print : PRINT LPAREN literal RPAREN 
+    print : PRINT LPAREN literals RPAREN 
     '''
     p[0] = Print(p[3])
 
@@ -341,7 +341,7 @@ def p_literal_1(p):
 
 def p_literal_2(p):
     '''
-    literal : STRING
+    literals : STRING
     '''
     p[0] = Literal("string",p[1])
 

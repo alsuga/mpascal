@@ -86,7 +86,7 @@ class Locals(AST):
 
 class Local(AST):
   _fields = ['id', 'typename','size']
-#falta
+
 class Funcdecl(AST):
   _fields = ['id','parameters', 'locals', 'statements']
 
@@ -122,7 +122,7 @@ class Skip(AST):
 
 class Return(AST):
   _fields = ['expression']
-#falta    
+
 class UnaryOp(AST):
   _fields = ['op', 'right']
 
@@ -342,7 +342,7 @@ class DotVisitor(NodeVisitor):
     self.num += 1
     vertice =pydot.Node("%s Funcion => %s" % ("(" +str(self.num)+") ", st))
     for i in getattr(node,"_fields"):
-      if str(i) != "id" and str(i) != "None":
+      if str(i) != "id" and getattr(node,i) != None:
         self.graph.add_edge(pydot.Edge(vertice,self.visit(getattr(node,i))))
     return vertice
 
