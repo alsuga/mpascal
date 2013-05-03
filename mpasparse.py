@@ -283,12 +283,12 @@ def p_cond(p):
 
 #se omiten los tipos de dato bool por ahora
 
-#def p_cond_1(p):
-#    '''
-#    cond : id
-#          | literal
-#    ''' 
-#    p[0] = p[1]
+# def p_cond_1(p):
+#     '''
+#     cond : location
+#           | BOOL
+#     ''' 
+#     p[0] = p[1]
 
 #se agregan las agrupaciones de los cond
 
@@ -356,6 +356,8 @@ def p_location_2(p):
     location : ID LBRACKET expression RBRACKET
     '''
     p[0] = Location(p[1],p[3])
+
+
 
 def p_empty(p):
     '''

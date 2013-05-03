@@ -1,0 +1,7 @@
+fun olak()
+  begin
+    write (ola)
+  end
+
+
+
