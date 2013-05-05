@@ -211,7 +211,7 @@ class CheckProgramVisitor(NodeVisitor):
     # 3. Revise que los tipos coincidan.
     self.visit(node.value)
     if(sym.type != node.value.type):
-      error(node.linelo,"No coinciden los tipos en la asignación")
+      error(node.lineno,"No coinciden los tipos en la asignación")
    
   def visit_ConstDeclaration(self,node):
     # 1. Revise que el nombre de la constante no se ha definido
@@ -234,7 +234,7 @@ class CheckProgramVisitor(NodeVisitor):
     if getattr(node,"size") != None :
       self.visit(getattr(node,"size"))
       if node.size.type != self.symtab.lookup("int"):
-        error(node.linelo,"Tamaño del vector mal definido")
+        error(node.lineno,"Tamaño del vector mal definido")
     node.type = self.symtab.lookup(node.typename)
 
   def visit_Location(self,node):
@@ -268,6 +268,8 @@ class CheckProgramVisitor(NodeVisitor):
     self.visit(node.parameters)
     self.visit(node.locals)
     self.visit(node.statements)
+    node.type = self.symtab.lookup("return") 
+
 
   def visit_Parameters(self, node):
     for p in node.parameters:
@@ -284,7 +286,7 @@ class CheckProgramVisitor(NodeVisitor):
   def visit_RelationalOp(self, node):
     self.visit(node.left)
     self.visit(node.right)
-    if not node.left.type == node.right.type:
+    if node.left.type != node.right.type:
       error(node.lineno, "Operandos de relación no son del mismo tipo")
     elif not mpaslex.operators[node.op] in node.left.type.bin_ops:
       error(node.lineno, "Operación no soportada con este tipo")
@@ -295,8 +297,16 @@ class CheckProgramVisitor(NodeVisitor):
 
   def visit_FunCall(self, node):
     pass
+
   def visit_ExprList(self, node):
     pass
+
+  def visit_Return(self, node):
+    self.visit(node.expression)
+    if(self.symtab.lookup("return") != node.expression.type):
+      error(node.lineno,"La funcion retorna dos tipos de dato distintos")
+    elif(self.symtab.lookup("return") == None):
+      self.symtab.add("return", node.expression.type)
 
   def visit_Empty(self, node):
     pass
