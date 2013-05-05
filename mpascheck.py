@@ -3,46 +3,46 @@
 '''
 Proyecto 3 : Chequeo del Programa
 =================================
-En este proyecto es necesario realizar comprobaciones sem·nticas en su programa. 
+En este proyecto es necesario realizar comprobaciones sem√°nticas en su programa. 
 Hay algunos aspectos diferentes para hacer esto.
 
-En primer lugar, tendr· que definir una tabla de sÌmbolos que haga un seguimiento
-de declaraciones de identificadores previamente declarados.  Se consultar· la 
-tabla de sÌmbolos siempre que el compilador necesite buscar informaciÛn sobre 
-variables y declaraciÛn de constantes.
+En primer lugar, tendr√° que definir una tabla de s√≠mbolos que haga un seguimiento
+de declaraciones de identificadores previamente declarados.  Se consultar√° la 
+tabla de s√≠mbolos siempre que el compilador necesite buscar informaci√≥n sobre 
+variables y declaraci√≥n de constantes.
 
-A continuaciÛn, tendr· que definir los objetos que representen los diferentes 
-tipos de datos incorporados y registrar informaciÛn acerca de sus capacidades.
+A continuaci√≥n, tendr√° que definir los objetos que representen los diferentes 
+tipos de datos incorporados y registrar informaci√≥n acerca de sus capacidades.
 Revise el archivo mpastype.py.
 
-Por ˙ltimo, tendr· que escribir cÛdigo que camine por el AST y haga cumplir un
-conjunto de reglas sem·nticas.  AquÌ est· una lista completa de todo los que
-deber· comprobar:
+Por √∫ltimo, tendr√° que escribir c√≥digo que camine por el AST y haga cumplir un
+conjunto de reglas sem√°nticas.  Aqu√≠ est√° una lista completa de todo los que
+deber√° comprobar:
 
-1.  Nombres y sÌmbolos:
+1.  Nombres y s√≠mbolos:
 
     Todos los identificadores deben ser definidos antes de ser usados.  Esto incluye variables, 
-    constantes y nombres de tipo.  Por ejemplo, esta clase de cÛdigo genera un error:
+    constantes y nombres de tipo.  Por ejemplo, esta clase de c√≥digo genera un error:
     
-       a = 3;              // Error. 'a' no est· definido.
+       a = 3;              // Error. 'a' no est√° definido.
        var a int;
 
     Note: los nombres de tipo como "int", "float" y "string" son nombres incorporados que
-    deben ser definidos al comienzo de un programa (funciÛn).
+    deben ser definidos al comienzo de un programa (funci√≥n).
     
 2.  Tipos de constantes
 
-    A todos los sÌmbolos constantes se le debe asignar un tipo como "int", "float" o "string".
+    A todos los s√≠mbolos constantes se le debe asignar un tipo como "int", "float" o "string".
     Por ejemplo:
 
        const a = 42;         // Tipo "int"
        const b = 4.2;        // Tipo "float"
        const c = "forty";    // Tipo "string"
 
-    Para hacer esta asignaciÛn, revise el tipo de Python del valor constante y adjunte el
+    Para hacer esta asignaci√≥n, revise el tipo de Python del valor constante y adjunte el
     nombre de tipo apropiado.
 
-3.  Chequeo de tipo operaciÛn binaria.
+3.  Chequeo de tipo operaci√≥n binaria.
 
     Operaciones binarias solamente operan sobre operandos del mismo tipo y produce un
     resultado del mismo tipo.  De lo contrario, se tiene un error de tipo.  Por ejemplo:
@@ -66,22 +66,22 @@ deber· comprobar:
     float:    binario { +, -, *, /}, unario { +, -}
     string:   binario { + }, unario { }
 
-    Los intentos de usar operadores no soportados deberÌa dar lugar a un error.
+    Los intentos de usar operadores no soportados deber√≠a dar lugar a un error.
     Por ejemplo:
 
     var string a = "Hello" + "World";     // OK
     var string b = "Hello" * "World";     // Error (op no soportado *)
 
-6.  AsignaciÛn.
+6.  Asignaci√≥n.
 
-    Los lados izquierdo y derecho de una operaciÛn de asignaciÛn deben ser 
+    Los lados izquierdo y derecho de una operaci√≥n de asignaci√≥n deben ser 
     declarados del mismo tipo.
 
-    Los valores sÛlo se pueden asignar a las declaraciones de variables, no
+    Los valores s√≥lo se pueden asignar a las declaraciones de variables, no
     a constantes.
 
 Para recorrer el AST, use la clase NodeVisitor definida en mpasast.py.
-Un caparazÛn de cÛdigo se proporciona a continuaciÛn.
+Un caparaz√≥n de c√≥digo se proporciona a continuaci√≥n.
 '''
 
 import sys, re, string, types
@@ -92,12 +92,12 @@ import mpaslex
 
 class SymbolTable(object):
   '''
-  Clase que representa una tabla de sÌmbolos.  Debe proporcionar funcionabilidad
+  Clase que representa una tabla de s√≠mbolos.  Debe proporcionar funcionabilidad
   para agregar y buscar nodos asociados con identificadores.
   '''
   def __init__(self, parent=None):
     '''
-    Crea una tabla se sÌmbol vacia con la tabla de sÌmbol
+    Crea una tabla se s√≠mbol vacia con la tabla de s√≠mbol
     padre.
     '''
 
@@ -111,9 +111,9 @@ class SymbolTable(object):
 
   def add(self, name, value):
     '''
-    Agrega un sÌmbol con el valor dado a la tabla de sÌmbol.
+    Agrega un s√≠mbol con el valor dado a la tabla de s√≠mbol.
     El valor es usualmente un nodo del AST que representa la
-    declaraciÛn o definiciÛn de una funciÛn/variable (p.e.,
+    declaraci√≥n o definici√≥n de una funci√≥n/variable (p.e.,
     Declaration o FunctionDefn).
     '''
     
@@ -127,8 +127,8 @@ class SymbolTable(object):
 
   def get(self, name):
     '''
-    Recupera el sÌmbol con el nombre dado desde la tabla de
-    sÌmbolos, recursivamente hacia arriba a travÈs del padre
+    Recupera el s√≠mbol con el nombre dado desde la tabla de
+    s√≠mbolos, recursivamente hacia arriba a trav√©s del padre
     si no se encuentra en la actual.
     '''
 
@@ -145,11 +145,11 @@ class SymbolTable(object):
 
 class CheckProgramVisitor(NodeVisitor):
   '''
-  Clase de RevisiÛn de programa.  Esta clase usa el patrÛn cisitor como est·
-  descrito en mpasast.py.  Es necesario definir mÈtodos de la forma visit_NodeName()
+  Clase de Revisi√≥n de programa.  Esta clase usa el patr√≥n cisitor como est√°
+  descrito en mpasast.py.  Es necesario definir m√©todos de la forma visit_NodeName()
   para cada tipo de nodo del AST que se desee procesar.
 
-  Nota: Usted tendr· que ajustar los nombres de los nodos del AST si ha elegido
+  Nota: Usted tendr√° que ajustar los nombres de los nodos del AST si ha elegido
   nombres diferentes.
   '''
   def __init__(self):
@@ -171,7 +171,7 @@ class CheckProgramVisitor(NodeVisitor):
   def visit_IfStatement(self, node):
     self.visit(node.cond)
     if not node.cond.type == mpastype.boolean_type:
-      error(node.lineno, "Tipo incorrecto para condiciÛn if")
+      error(node.lineno, "Tipo incorrecto para condici√≥n if")
     else:
       self.visit(node.then_b)
       if node.else_b:
@@ -180,21 +180,21 @@ class CheckProgramVisitor(NodeVisitor):
   def visit_WhileStatement(self, node):
     self.visit(node.cond)
     if not node.cond.type == mpastype.boolean_type:
-      error(node.lineno, "Tipo incorrecto para condiciÛn while")
+      error(node.lineno, "Tipo incorrecto para condici√≥n while")
     else:
       self.visit(node.body)
 
   def visit_UnaryOp(self, node):
-    # 1. Aseg˙rese que la operaciÛn es compatible con el tipo
+    # 1. Aseg√∫rese que la operaci√≥n es compatible con el tipo
     # 2. Ajuste el tipo resultante al mismo del operando
     self.visit(node.right)
     if not mpaslex.operators[node.op] in node.right.type.un_ops:
-      error(node.lineno, "OperaciÛn no soportada con este tipo")
+      error(node.lineno, "Operaci√≥n no soportada con este tipo")
     node.type = node.right.type
 
   def visit_BinaryOp(self, node):
-    # 1. Aseg˙rese que los operandos left y right tienen el mismo tipo
-    # 2. Aseg˙rese que la operaciÛn est· soportada
+    # 1. Aseg√∫rese que los operandos left y right tienen el mismo tipo
+    # 2. Aseg√∫rese que la operaci√≥n est√° soportada
     # 3. Asigne el tipo resultante
     self.visit(node.left)
     self.visit(node.right)
@@ -203,44 +203,43 @@ class CheckProgramVisitor(NodeVisitor):
     node.type = node.left.type
 
   def visit_AssignmentStatement(self,node):
-    # 1. Aseg˙rese que la localizaciÛn de la asignaciÛn est· definida
+    # 1. Aseg√∫rese que la localizaci√≥n de la asignaci√≥n est√° definida
     sym = self.symtab.lookup(node.location)
-    assert sym, "Asignado a un sym desconocido"
-    # 2. Revise que la asignaciÛn es permitida, pe. sym no es una constante
+    if sym == None:
+      error(node.lineno,"El id %s no ha sido declarado" % node.location)
+    # 2. Revise que la asignaci√≥n es permitida, pe. sym no es una constante
     # 3. Revise que los tipos coincidan.
     self.visit(node.value)
-    assert sym.type == node.value.type, "Tipos no coinciden en asignaciÛn"
-
+    if(sym.type != node.value.type):
+      error(node.linelo,"No coinciden los tipos en la asignaci√≥n")
+   
   def visit_ConstDeclaration(self,node):
     # 1. Revise que el nombre de la constante no se ha definido
     if self.symtab.lookup(node.id):
-      error(node.lineno, "SÌmbol %s ya definido" % node.id)
-    # 2. Agrege una entrada a la tabla de sÌmbolos
+      error(node.lineno, "S√≠mbol %s ya definido" % node.id)
+    # 2. Agrege una entrada a la tabla de s√≠mbolos
     else:
       self.symtab.add(node.id, node)
     self.visit(node.value)
     node.type = node.value.type
 
-  def visit_VarDeclaration(self,node):
+  def visit_Local(self,node):
     # 1. Revise que el nombre de la variable no se ha definido
     if self.symtab.lookup(node.id):
-      error(node.lineno, "SÌmbol %s ya definido" % node.id)
-    # 2. Agrege la entrada a la tabla de sÌmbolos
+      error(node.lineno, "S√≠mbol %s ya definido" % node.id)
+    # 2. Agrege la entrada a la tabla de s√≠mbolos
     else:
       self.symtab.add(node.id, node)
-    # 2. Revise que el tipo de la expresiÛn (si lo hay) es el mismo
-    if node.value:
-      self.visit(node.value)
-      assert(node.typename == node.value.type.name)
-    # 4. Si no hay expresiÛn, establecer un valor inicial para el valor
-    else:
-      node.value = None
+    # 2. Revise que el tipo de la expresi√≥n (si lo hay) es el mismo
+    if getattr(node,"size") != None :
+      self.visit(getattr(node,"size"))
+      if node.size.type != self.symtab.lookup("int"):
+        error(node.linelo,"Tama√±o del vector mal definido")
     node.type = self.symtab.lookup(node.typename)
-    assert(node.type)
 
   def visit_Location(self,node):
-    # 1. Revisar que la localizaciÛn es una variable v·lida o un valor constante
-    # 2. Asigne el tipo de la localizaciÛn al nodo
+    # 1. Revisar que la localizaci√≥n es una variable v√°lida o un valor constante
+    # 2. Asigne el tipo de la localizaci√≥n al nodo
     if node.pos:
     	self.visit(node.pos)
     	if node.pos.type != self.symtab.lookup("int") : 
@@ -263,7 +262,9 @@ class CheckProgramVisitor(NodeVisitor):
 
   def visit_Funcdecl(self, node):
     if self.symtab.lookup(node.id):
-      error(node.lineno, "SÌmbol %s ya definido" % node.id)
+      error(node.lineno, "S√≠mbol %s ya definido" % node.id)
+    else:
+      self.symtab.add(node.id)
     self.visit(node.parameters)
     self.visit(node.locals)
     self.visit(node.statements)
@@ -274,6 +275,7 @@ class CheckProgramVisitor(NodeVisitor):
 #falta
   def visit_Parameters_Declaration(self, node):
     node.type = self.symtab.lookup(node.typename)
+    self.symtab.add(node.id,node.typename)
 
   def visit_Group(self, node):
     self.visit(node.expression)
@@ -283,10 +285,13 @@ class CheckProgramVisitor(NodeVisitor):
     self.visit(node.left)
     self.visit(node.right)
     if not node.left.type == node.right.type:
-      error(node.lineno, "Operandos de relaciÛn no son del mismo tipo")
+      error(node.lineno, "Operandos de relaci√≥n no son del mismo tipo")
     elif not mpaslex.operators[node.op] in node.left.type.bin_ops:
-      error(node.lineno, "OperaciÛn no soportada con este tipo")
+      error(node.lineno, "Operaci√≥n no soportada con este tipo")
     node.type = self.symtab.lookup('bool')
+
+  def visit_Locals(self, node):
+    pass
 
   def visit_FunCall(self, node):
     pass
@@ -298,9 +303,9 @@ class CheckProgramVisitor(NodeVisitor):
 
   def push_symtab(self, node):
     '''
-    Inserta una tabla de sÌmbolos dentro de la pila de tablas de
-    sÌmbolos del visitor y adjunta esta tabla de sÌmbolos al nodo
-    dado.  Se utiliza siempre que un ·mbito lÈxico es encontrado,
+    Inserta una tabla de s√≠mbolos dentro de la pila de tablas de
+    s√≠mbolos del visitor y adjunta esta tabla de s√≠mbolos al nodo
+    dado.  Se utiliza siempre que un √°mbito l√©xico es encontrado,
     por lo que el nodo es un objeto CompoundStatement.
     '''
 
@@ -309,8 +314,8 @@ class CheckProgramVisitor(NodeVisitor):
 
   def pop_symtab(self):
     '''
-    Extrae una tabla de sÌmbolos de la pila de tablas de sÌmbol
-    del visitor.  Se utiliza cuando se sale de un ·mbito lÈxico.
+    Extrae una tabla de s√≠mbolos de la pila de tablas de s√≠mbol
+    del visitor.  Se utiliza cuando se sale de un √°mbito l√©xico.
     '''
 
     self.curr_symtab = self.curr_symtab.parent
