@@ -23,6 +23,7 @@ class AST(object):
   también asignados.
   '''
   _fields = []
+  linelo = 0
   def __init__(self,*args,**kwargs):
     assert len(args) == len(self._fields)
     for name,value in zip(self._fields,args):
