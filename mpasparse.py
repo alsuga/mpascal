@@ -181,7 +181,7 @@ def p_assign(p):
     '''
     assign : location ASSIGN expression  
     '''
-    p[0] = Assignment(p[1], p[3], lineno=p.lineno(1))
+    p[0] = Assignment(p[1], p[3], lineno=p.lineno(2))
 
 def p_print(p):
     '''
@@ -399,6 +399,6 @@ if __name__ == '__main__':
     print "listo visitado"
     #dot.graph.write_png("grafo.png")
 
-    #dump_tree(program)
+    dump_tree(program)
     #for depth,node in flatten(program):
     #    print("%s%s" % (" "*(4*depth),node.__class__.__name__))

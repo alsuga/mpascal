@@ -159,8 +159,11 @@ class CheckProgramVisitor(NodeVisitor):
 
   def visit_UnaryOp(self, node):
     self.visit(node.right)
-    if not mpaslex.operators[node.op] in node.right.type.un_ops:
-      error(node.lineno, "Operacion no soportada con este tipo")
+    if not node.right.type == None:
+      if not mpaslex.operators[node.op] in node.right.type.un_ops:
+        error(node.lineno, "Operacion no soportada con este tipo")
+    else:
+      error(node.lineno, "Operacion invalida")
     node.type = node.right.type
 
   def visit_BinaryOp(self, node):
@@ -170,6 +173,7 @@ class CheckProgramVisitor(NodeVisitor):
       error(node.lineno, "No coinciden los tipos de los operandos en la operacion con '%s'" % node.op)
     if node.left.type == None or node.right.type == None:
       error(node.lineno, "Los operadores no tienen un tipo")
+      node.type = self.symtab.lookup("void")
     else:
       if node.op == "+" or node.op == "-" or node.op == "*" or node.op == "/":
         node.type = node.left.type
@@ -215,6 +219,7 @@ class CheckProgramVisitor(NodeVisitor):
       node.type = self.symtab.lookup(node.id)
     else:
       error(node.lineno, "El id '%s' no ha sido definido" % node.id)
+      node.type = self.symtab.lookup("void")
 
   def visit_Literal(self,node):
     # Adjunte un tipo apropiado a la constante
@@ -239,12 +244,12 @@ class CheckProgramVisitor(NodeVisitor):
       self.addfunc(node.id,i.type)
     self.visit(node.locals)
     self.visit(node.statements)
-    self.pop_symtab()
     if self.symtab.entries.has_key("return"):
       node.type = self.symtab.lookup("return") 
-      self.symtab.entries[node.id] = node.type
     else:
       node.type = self.symtab.lookup("void")
+    self.pop_symtab()
+    self.symtab.entries[node.id] = node.type
 
   def visit_FunCall(self, node):
     if self.symtab.lookup(node.id) == None:
@@ -269,7 +274,7 @@ class CheckProgramVisitor(NodeVisitor):
     self.visit(node.expression)
     node.type = node.expression.type
 
-  def visit_RelationalOp(self, node):
+  def visit_Relation(self, node):
     self.visit(node.left)
     self.visit(node.right)
     if node.left.type != node.right.type:
@@ -278,15 +283,20 @@ class CheckProgramVisitor(NodeVisitor):
       error(node.lineno, "Operación no soportada con este tipo")
     node.type = self.symtab.lookup('bool')
 
-#agregar como comprobar que los argumentos son correctos
-
-
   def visit_Return(self, node):
     self.visit(node.expression)
     if not self.symtab.entries.has_key("return"):
       self.symtab.add("return", node.expression.type)
     elif(self.symtab.lookup("return") != node.expression.type):
       error(node.lineno,"La funcion retorna dos tipos de dato distintos")
+
+  def visit_Cast(self,node):
+    self.visit(node.expression)
+    if node.typename == "int" or node.typename=="float":
+      node.type = self.symtab.lookup(node.typename)
+    else:
+      error(node.lineno,"Cast invalido")
+      node.type = self.symtab.lookup("void")
 
   def visit_Empty(self, node):
     pass
