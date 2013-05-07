@@ -121,14 +121,6 @@ class SymbolTable(object):
 
 
 class CheckProgramVisitor(NodeVisitor):
-  '''
-  Clase de Revisión de programa.  Esta clase usa el patrón cisitor como está
-  descrito en mpasast.py.  Es necesario definir métodos de la forma visit_NodeName()
-  para cada tipo de nodo del AST que se desee procesar.
-
-  Nota: Usted tendrá que ajustar los nombres de los nodos del AST si ha elegido
-  nombres diferentes.
-  '''
   def __init__(self):
     # Inicializa la tabla de simbolos
     self.symtab = SymbolTable()
@@ -139,6 +131,7 @@ class CheckProgramVisitor(NodeVisitor):
     self.symtab.add("float",mpastype.float_type)
     self.symtab.add("string",mpastype.string_type)
     self.symtab.add("bool",mpastype.boolean_type)
+    self.symtab.add("void",mpastype.void_type)
 
   def visit_Program(self,node):
     # 1. Visita todas las declaraciones (statements)
@@ -149,7 +142,7 @@ class CheckProgramVisitor(NodeVisitor):
   def visit_IfStatement(self, node):
     self.visit(node.cond)
     if node.cond.type != mpastype.boolean_type:
-      error(node.lineno, "Tipo incorrecto para condición if")
+      error(node.lineno, "Tipo incorrecto para condicion if")
     else:
       self.visit(node.then_b)
       if node.else_b:
@@ -158,7 +151,7 @@ class CheckProgramVisitor(NodeVisitor):
   def visit_WhileStatement(self, node):
     self.visit(node.cond)
     if not node.cond.type == mpastype.boolean_type:
-      error(node.lineno, "Tipo incorrecto para condición while")
+      error(node.lineno, "Tipo incorrecto para condicion while")
     else:
       self.visit(node.body)
 
@@ -167,7 +160,7 @@ class CheckProgramVisitor(NodeVisitor):
   def visit_UnaryOp(self, node):
     self.visit(node.right)
     if not mpaslex.operators[node.op] in node.right.type.un_ops:
-      error(node.lineno, "Operación no soportada con este tipo")
+      error(node.lineno, "Operacion no soportada con este tipo")
     node.type = node.right.type
 
   def visit_BinaryOp(self, node):
@@ -184,28 +177,27 @@ class CheckProgramVisitor(NodeVisitor):
         node.type = self.symtab.lookup("bool")
 
   def visit_Assignment(self,node):
-    # 1. Asegúrese que la localización de la asignación está definida
     self.visit(node.location)
     sym = self.symtab.lookup(node.location.id)
     if sym == None:
       error(node.lineno,"El id '%s' no ha sido definido" % node.location.id)
     self.visit(node.expression)
     if(sym != node.expression.type):
-      error(node.lineno,"No coinciden los tipos en la asignación '%s'" % node.location.id)
+      error(node.lineno,"No coinciden los tipos en la asignacion '%s'" % node.location.id)
    
-  def visit_ConstDeclaration(self,node):
-    # 1. Revise que el nombre de la constante no se ha definido
-    if self.symtab.lookup(node.id):
-      error(node.lineno, "Símbol '%s' ya definido" % node.id)
-    # 2. Agrege una entrada a la tabla de símbolos
-    else:
-      self.symtab.add(node.id, node)
-    self.visit(node.value)
-    node.type = node.value.type
+  # def visit_ConstDeclaration(self,node):
+  #   # 1. Revise que el nombre de la constante no se ha definido
+  #   if self.symtab.lookup(node.id):
+  #     error(node.lineno, "Simbolo '%s' ya definido" % node.id)
+  #   # 2. Agrege una entrada a la tabla de símbolos
+  #   else:
+  #     self.symtab.add(node.id, node)
+  #   self.visit(node.value)
+  #   node.type = node.value.type
 
   def visit_Local(self,node):
     if self.symtab.lookup(node.id):
-      error(node.lineno, "Símbol '%s' ya definido" % node.id)
+      error(node.lineno, "Identificador '%s' ya definido" % node.id)
     else:
       self.symtab.add(node.id, self.looktype(node.typename))
     if getattr(node,"size") != None :
@@ -239,6 +231,7 @@ class CheckProgramVisitor(NodeVisitor):
     if self.symtab.lookup(node.id):
       error(node.lineno, "El identificador de la funcion '%s' ya esta definido" % node.id)
       pass
+    self.symtab.add(node.id, self.symtab.lookup("void"))
     self.push_symtab()
     for i in node.parameters.parameters:
       if i == None: break
@@ -247,8 +240,23 @@ class CheckProgramVisitor(NodeVisitor):
     self.visit(node.locals)
     self.visit(node.statements)
     self.pop_symtab()
-    node.type = self.symtab.lookup("return") 
-    self.symtab.add(node.id, node.type)
+    if self.symtab.entries.has_key("return"):
+      node.type = self.symtab.lookup("return") 
+      self.symtab.entries[node.id] = node.type
+    else:
+      node.type = self.symtab.lookup("void")
+
+  def visit_FunCall(self, node):
+    if self.symtab.lookup(node.id) == None:
+      error(node.lineno, "Funcion '%s' no definida" % node.id)
+    if self.func.has_key(node.id):
+      for i,j in zip(node.parameters.expressions, self.func[node.id]):
+        self.visit(i)
+        if(i.type != j):
+          error(node.lineno, "Tipo erroneo de argumentos en el llamado a la funcion '%s'" % node.id)   
+    else:
+      pass
+    node.type = self.symtab.lookup(node.id)
 
   def visit_Parameters_Declaration(self, node):
     if(self.symtab.lookup(node.id) != None ):
@@ -271,17 +279,7 @@ class CheckProgramVisitor(NodeVisitor):
     node.type = self.symtab.lookup('bool')
 
 #agregar como comprobar que los argumentos son correctos
-  def visit_FunCall(self, node):
-    node.type = self.symtab.lookup("int")
-    if not self.symtab.entries.has_key(node.id):
-      error(node.lineno, "Función '%s' no definida" % node.id)
-    if self.func.has_key(node.id):
-      for i,j in zip(node.parameters.expressions, self.func[node.id]):
-        self.visit(i)
-        if(i.type != j):
-          error(node.lineno, "Tipo erroneo de argumentos en el llamado a la funcion '%s'" % node.id)   
-    else:
-      pass
+
 
   def visit_Return(self, node):
     self.visit(node.expression)

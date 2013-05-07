@@ -61,6 +61,7 @@ boolean_type = MpasType("bool",
 	set(('LAND', 'LOR', 'EQ', 'NE')),
 	set(('LNOT',))
 	)
+void_type = MpasType("void")
 # En el código de verificación, deberá hacer referencia a los 
 # objetos de tipos de arriba.  Piense en como va a querer tener 
 # acceso a ellos.
