@@ -12,9 +12,9 @@ def error(lineno, message, filename=None):
   '''
   global _num_errors
   if not filename:
-    errmsg = "{}: {}".format(lineno, message)
+    errmsg = "Error en {}: {}".format(lineno, message)
   else:
-    errmsg = "{}:{}: {}".format(filename,lineno,message)
+    errmsg = "Error en {}:{}: {}".format(filename,lineno,message)
   for subscriber in _subscribers:
     subscriber(errmsg)
   _num_errors += 1

@@ -118,8 +118,6 @@ class SymbolTable(object):
         return None
 
 
-
-
 class CheckProgramVisitor(NodeVisitor):
   def __init__(self):
     # Inicializa la tabla de simbolos
@@ -154,8 +152,6 @@ class CheckProgramVisitor(NodeVisitor):
       error(node.lineno, "Tipo incorrecto para condicion while")
     else:
       self.visit(node.body)
-
-#falta acomodar esto!
 
   def visit_UnaryOp(self, node):
     self.visit(node.right)

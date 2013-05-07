@@ -23,7 +23,7 @@ def p_program(p):
         p[0] = p[1]
         p[0].lineno = p[1].lineno
     else:
-        p[0] = Program([p[1]], lineno=p.lineno(1))
+        p[0] = Program([p[1]])
 
 #vuelve st para los BEGIN  y END en los while, if y else
 
@@ -56,6 +56,16 @@ def p_statements_1(p):
     p[1].append(p[3])
     p[0] = p[1]
     p[0].lineno = p[1].lineno
+
+def p_statementsError(p):
+    '''
+    statements : statements statement
+
+    '''   
+    sys.stderr.write("Error en %d: Mala definicion de declaracion. Falta de ';' \n" % (lexer.lineno-1))
+    p[1].append(p[2])
+    p[0]=p[1] 
+
 
 def p_statement(p):
     '''
@@ -105,11 +115,13 @@ def p_local(p):
     '''
     p[0] = Local(p[1], p[3],None, lineno=p.lineno(1))
 
+
 def p_local_1(p):
     '''
     local : ID COLON TYPENAME LBRACKET literal RBRACKET 
     '''
     p[0] = Local(p[1], p[3], p[5], lineno=p.lineno(1))
+
 
 def p_local_2(p):
     '''
@@ -118,6 +130,32 @@ def p_local_2(p):
     p[0] = p[1]
     p[0].lineno = p[1].lineno
 
+   
+def p_localError1(p):
+    '''
+    locals : locals local       
+    '''
+    error(p.lineno,"Mala definicion de local. Falta de ';'")
+    pass
+
+
+def p_localError2(p):
+    '''
+    locals : local        
+    '''
+    error(p.lineno,"Mala definicion de local. Falta de ';' ")
+    pass
+
+
+def p_localError3(p):
+    '''
+    local : ID COLON ID
+          | ID COLON ID LBRACKET literal RBRACKET
+    '''
+    error(p.lineno,"Tipo de dato no valido")
+
+
+
 def p_fundecl(p):
     '''
     function : FUNC ID LPAREN parameters RPAREN locals BEGIN statements END
@@ -125,12 +163,16 @@ def p_fundecl(p):
     p[0] = Funcdecl(p[2], p[4], p[6], p[8], lineno=p.lineno(1)) 
 
 #nueva, no cambia el arbol
+# def p_FunctionError1(p):
+#     'function : FUNC ID LPAREN parameters RPAREN BEGIN statements END SEMI' 
+#     sys.stderr.write("Error en %d: Mala definicion de declaracion. Sobra un ';' \n" % (lexer.lineno-1))
 
 def p_fundecl_1(p):
     '''
     function : FUNC ID LPAREN parameters RPAREN BEGIN statements END
     '''
     p[0] = Funcdecl(p[2], p[4], None, p[7], lineno=p.lineno(1)) 
+
 
 def p_parameters(p):
     '''
@@ -171,11 +213,40 @@ def p_if_else(p):
     '''
     p[0] = IfStatement(p[2], p[4], p[6], lineno=p.lineno(1))
 
+def p_ifError1(p):
+    '''
+    if : IF cond statement %prec ELSE
+    '''
+    error(p.lineno,"Falta sentencia 'THEN'" )
+    pass
+
+def p_ifError2(p):
+    '''
+    if : IF cond ID statement %prec ELSE
+    '''
+    error(p.lineno,"Mal manejo de sentencia 'THEN'")
+    p[0] = IfStatement(p[2], p[4], None)
+    pass
+
+def p_if_elseError(p):
+    '''
+    if_else :  IF cond statement ELSE statement
+    '''
+    error(p.lineno,"Falta sentencia 'THEN'")
+    pass
+
 def p_while(p):
     '''
     while : WHILE cond DO statement
     '''
     p[0] = WhileStatement(p[2], p[4], lineno=p.lineno(1))
+
+def p_whileError(p):
+    '''
+    while : WHILE cond statement
+    '''
+    error(p.lineno,"Falta sentencia 'DO' despues del la condicion")
+
 
 def p_assign(p):
     '''
@@ -200,6 +271,15 @@ def p_return(p):
     return : RETURN expression 
     '''
     p[0] = Return(p[2], lineno=p.lineno(1))
+
+def p_returnError(p):
+    '''
+    return : RETURN statement
+    '''
+    error(p.lineno,"No se soporta el retorno de 'statements' con RETURN")
+    p[0] = Return(p[2])
+    pass
+
 
 def p_read(p):
     '''
@@ -327,6 +407,13 @@ def p_exprlist(p):
     p[0] = p[1]
     p[0].lineno = p[1].lineno
 
+def p_exprlistError(p):
+    '''
+    exprlist :  exprlist expression
+    '''
+    p[0] = p[1]
+    error(p.lineno,"Falta en el uso de ',' entre expressiones")
+
 def p_exprlist_1(p):
     '''
     exprlist : expression
@@ -376,6 +463,7 @@ def p_empty(p):
 
 def p_error(p):
     if p:
+        #error(p.lineno,"Error: %s" %p)
         error(p.lineno, "Error de sintaxis en el token '%s'" % p.value)
     else:
         error("EOF","Error de sintaxis, fin de entrada.")
@@ -393,12 +481,11 @@ if __name__ == '__main__':
     parser = make_parser()
     with subscribe_errors(lambda msg: sys.stdout.write(msg+"\n")):
         program = parser.parse(open(sys.argv[1]).read())
-    print "listo parte uno"
+    #print "listo parte uno"
     #dot = DotVisitor()
     #dot.visit(program)
-    print "listo visitado"
+    #print "listo visitado"
     #dot.graph.write_png("grafo.png")
-
     dump_tree(program)
     #for depth,node in flatten(program):
     #    print("%s%s" % (" "*(4*depth),node.__class__.__name__))
