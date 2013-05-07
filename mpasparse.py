@@ -23,7 +23,6 @@ def p_program(p):
         p[0] = p[1]
     else:
         p[0] = Program([p[1]])
-
 #vuelve st para los BEGIN  y END en los while, if y else
 
 def p_st(p):
@@ -54,6 +53,16 @@ def p_statements_1(p):
     p[1].append(p[3])
     p[0] = p[1]
 
+def p_statementsError(p):
+    '''
+    statements : statements statement
+
+    '''   
+    sys.stderr.write("Error en %d: Mala definicion de declaracion. Falta de ';' \n" % (lexer.lineno-1))
+    p[1].append(p[2])
+    p[0]=p[1] 
+
+
 def p_statement(p):
     '''
     statement : assign
@@ -83,48 +92,82 @@ def p_statement(p):
 
 def p_locals(p):
     '''
-    locals : locals local
+    locals : locals local SEMI
     '''
     p[1].append(p[2])
     p[0] = p[1]
 
 def p_locals_1(p):
     '''
-    locals : local
+    locals : local SEMI
     '''
     p[0] = Locals([p[1]])
 
 def p_local(p):
     '''
-    local : ID COLON TYPENAME SEMI
+    local : ID COLON TYPENAME 
     '''
     p[0] = Local(p[1], p[3],None)
 
+
 def p_local_1(p):
     '''
-    local : ID COLON TYPENAME LBRACKET literal RBRACKET SEMI
+    local : ID COLON TYPENAME LBRACKET literal RBRACKET 
     '''
     p[0] = Local(p[1], p[3], p[5])
 
+
 def p_local_2(p):
     '''
-    local : function SEMI
+    local : function 
     '''
     p[0] = p[1]
+   
+
+
+def p_localError1(p):
+    '''
+    locals : locals local       
+    '''
+    sys.stderr.write("Error en %d: Mala definicion de local. Falta de ';' \n" % (lexer.lineno-1))
+    #p[1].append(p[2])
+    pass
+
+
+def p_localError2(p):
+    '''
+    locals : local        
+    '''
+    sys.stderr.write("Error en %d: Mala definicion de local. Falta de ';' \n" % (lexer.lineno-1))
+    pass
+
+
+def p_localError3(p):
+    '''
+    local : ID COLON ID
+          | ID COLON ID LBRACKET literal RBRACKET
+    '''
+    sys.stderr.write("Error en %d: Tipo de dato no valido\n"%(lexer.lineno))
+
 
 def p_fundecl(p):
     '''
     function : FUNC ID LPAREN parameters RPAREN locals BEGIN statements END
     '''
-    p[0] = Funcdecl(p[2], p[4], p[6], p[8]) 
+    p[0] = Funcdecl(p[2], p[4], p[6], p[8])
+
 
 #nueva, no cambia el arbol
+# def p_FunctionError1(p):
+#     'function : FUNC ID LPAREN parameters RPAREN BEGIN statements END SEMI' 
+#     sys.stderr.write("Error en %d: Mala definicion de declaracion. Sobra un ';' \n" % (lexer.lineno-1))
 
 def p_fundecl_1(p):
     '''
     function : FUNC ID LPAREN parameters RPAREN BEGIN statements END
     '''
     p[0] = Funcdecl(p[2], p[4], None, p[7]) 
+
 
 def p_parameters(p):
     '''
@@ -164,11 +207,41 @@ def p_if_else(p):
     '''
     p[0] = IfStatement(p[2], p[4], p[6])
 
+def p_ifError1(p):
+    '''
+    if : IF cond statement %prec ELSE
+    '''
+    sys.stderr.write("Error en %d: Falta sentencia 'THEN'\n" % (lexer.lineno-1))
+    pass
+
+def p_ifError2(p):
+    '''
+    if : IF cond ID statement %prec ELSE
+    '''
+    sys.stderr.write("Error en %d: Mal manejo de sentencia 'THEN'\n" % (lexer.lineno-1))
+    p[0] = IfStatement(p[2], p[4], None)
+    pass
+
+def p_if_elseError(p):
+    '''
+    if_else :  IF cond statement ELSE statement
+    '''
+    sys.stderr.write("Error en %d: Falta sentencia 'THEN'\n" % (lexer.lineno-1))
+    pass
+
 def p_while(p):
     '''
     while : WHILE cond DO statement
     '''
     p[0] = WhileStatement(p[2], p[4])
+
+def p_whileError(p):
+    '''
+    while : WHILE cond statement
+    '''
+    pass
+    sys.stderr.write("Error en %d: Falta sentencia 'DO' despues del la condicion\n" % (lexer.lineno-1))
+
 
 def p_assign(p):
     '''
@@ -193,6 +266,15 @@ def p_return(p):
     return : RETURN expression 
     '''
     p[0] = Return(p[2])
+
+def p_returnError(p):
+    '''
+    return : RETURN statement
+    '''
+    sys.stderr.write("Error en %d: No se soporta el retorno de 'statements' con RETURN\n" % (lexer.lineno-1))
+    p[0] = Return(p[2])
+    pass
+
 
 def p_read(p):
     '''
@@ -318,6 +400,13 @@ def p_exprlist(p):
     p[1].append(p[3])
     p[0] = p[1]
 
+def p_exprlistError(p):
+    '''
+    exprlist :  exprlist expression
+    '''
+    p[0] = p[1]
+    sys.stderr.write("Error en %d: Falta en el uso de ',' entre expressiones\n" % (lexer.lineno))
+
 def p_exprlist_1(p):
     '''
     exprlist : expression
@@ -367,7 +456,8 @@ def p_empty(p):
 
 def p_error(p):
     if p:
-        error(p.lineno, "Error de sintaxis en el token '%s'" % p.value)
+        error(p.lineno,"Error: %s" %p)
+        error((p.lineno), "Error de sintaxis en el token '%s'" % p.value)
     else:
         error("EOF","Error de sintaxis, fin de entrada.")
 
@@ -384,10 +474,11 @@ if __name__ == '__main__':
     parser = make_parser()
     with subscribe_errors(lambda msg: sys.stdout.write(msg+"\n")):
         program = parser.parse(open(sys.argv[1]).read())
-    print "listo parte uno"
+    #print "listo parte uno"
     dot = DotVisitor()
     dot.visit(program)
-    print "listo visitado"
+    #print "listo visitado"
+    print "-- mpasparse complete --"
     dot.graph.write_png("grafo.png")
 
     #dump_tree(program)
