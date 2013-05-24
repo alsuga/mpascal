@@ -92,9 +92,10 @@ import mpaslex
 
 class SymbolTable(object):
  
-  def __init__(self, parent=None):
+  def __init__(self, parent=None,fun = None):
     self.entries = {}
     self.parent = parent
+    self.actfun = fun
 
 #  def lookup(self, a):
 #    return self.entries.get(a)
@@ -211,10 +212,10 @@ class CheckProgramVisitor(NodeVisitor):
       self.visit(node.pos)
       if node.pos.type != self.symtab.lookup("int") : 
         error(node.lineno, "Acceso invalido al vector")
-    if self.symtab.entries.has_key(node.id):
+    if self.symtab.lookup(node.id):
       node.type = self.symtab.lookup(node.id)
     else:
-      error(node.lineno, "El id '%s' no ha sido definido" % node.id)
+      error(node.lineno, "El identificador '%s' no ha sido definido" % node.id)
       node.type = self.symtab.lookup("void")
 
   def visit_Literal(self,node):
@@ -232,18 +233,18 @@ class CheckProgramVisitor(NodeVisitor):
     if self.symtab.lookup(node.id):
       error(node.lineno, "El identificador de la funcion '%s' ya esta definido" % node.id)
       pass
-    self.symtab.add(node.id, self.symtab.lookup("void"))
-    self.push_symtab()
+    self.push_symtab(node.id)
     for i in node.parameters.parameters:
       if i == None: break
       self.visit(i)
       self.addfunc(node.id,i.type)
     self.visit(node.locals)
-    self.visit(node.statements)
+    self.check_return(node.statements)
     if self.symtab.entries.has_key("return"):
       node.type = self.symtab.lookup("return") 
     else:
       node.type = self.symtab.lookup("void")
+    self.visit(node.statements)
     self.pop_symtab()
     self.symtab.entries[node.id] = node.type
 
@@ -260,7 +261,7 @@ class CheckProgramVisitor(NodeVisitor):
     node.type = self.symtab.lookup(node.id)
 
   def visit_Parameters_Declaration(self, node):
-    if(self.symtab.lookup(node.id) != None ):
+    if(self.symtab.entries.has_key(node.id)):
       error(node.lineno,"Variable '%s' ya definida" % node.id)
     else:
       node.type = self.symtab.lookup(node.typename)
@@ -296,6 +297,20 @@ class CheckProgramVisitor(NodeVisitor):
 
   def visit_Empty(self, node):
     pass
+
+  def check_return(self, node):
+    if hasattr(node,"statements"):
+      for i in node.statements:
+        if i.__class__.__name__ == "return" :
+          self.visit_Return(i)
+        elif hasattr(i,"statements"): 
+          self.check_return(i.statements)
+        elif hasattr(i,"then_b") : 
+          self.check_return(i.then_b)
+        elif hasattr(i,"else_b") :
+          self.check_return(i.else_b)
+    elif node.__class__.__name__ == "return" :
+      self.visit_Return(i)
 
   def addfunc(self,key,value):
     if self.func.has_key(key):

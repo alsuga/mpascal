@@ -62,7 +62,7 @@ def p_statementsError(p):
     statements : statements statement
 
     '''   
-    sys.stderr.write("Error en %d: Mala definicion de declaracion. Falta de ';' \n" % (lexer.lineno-1))
+    error(p[2].lineno, "Mala definicion de declaracion. Falta de ';' \n")
     p[1].append(p[2])
     p[0]=p[1] 
 
@@ -272,13 +272,13 @@ def p_return(p):
     '''
     p[0] = Return(p[2], lineno=p.lineno(1))
 
-def p_returnError(p):
-    '''
-    return : RETURN statement
-    '''
-    error(p.lineno,"No se soporta el retorno de 'statements' con RETURN")
-    p[0] = Return(p[2])
-    pass
+# def p_returnError(p):
+#     '''
+#     return : RETURN statement
+#     '''
+#     error(p.lineno,"No se soporta el retorno de 'statements' con RETURN")
+#     p[0] = Return(p[2])
+#     pass
 
 
 def p_read(p):
@@ -407,12 +407,12 @@ def p_exprlist(p):
     p[0] = p[1]
     p[0].lineno = p[1].lineno
 
-def p_exprlistError(p):
-    '''
-    exprlist :  exprlist expression
-    '''
-    p[0] = p[1]
-    error(p.lineno,"Falta en el uso de ',' entre expressiones")
+# def p_exprlistError(p):
+#     '''
+#     exprlist :  exprlist expression
+#     '''
+#     p[0] = p[1]
+#     error(p.lineno,"Falta en el uso de ',' entre expressiones")
 
 def p_exprlist_1(p):
     '''

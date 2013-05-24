@@ -8,4 +8,5 @@ begin
     z[0] := 2*x;
     z[123+45*2] := x;
     z[x+2*(x+4)] := z[x-2]
+    break;
 end
