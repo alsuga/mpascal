@@ -1,4 +1,4 @@
-fun bad_return1():float
+fun bad_return1()
    a : int[40];
    b : float[30];
    n : int;
@@ -8,7 +8,7 @@ fun bad_return1():float
       return f      /* okay */
    end
 
-fun bad_return2():int
+fun bad_return2()
    a : int[40];
    b : float[30];
    n : int;
@@ -18,7 +18,7 @@ fun bad_return2():int
       return n      /* okay */
    end
 
-fun bad_return3():int
+fun bad_return3()
    a : int[40];
    b : float[30];
    n : int;
@@ -28,7 +28,7 @@ fun bad_return3():int
       return n[i]   /* Bad array */
    end
 
-fun bad_return4():int[40]
+fun bad_return4()
    a : int[40];
    b : float[30];
    n : int;
@@ -38,7 +38,7 @@ fun bad_return4():int[40]
       return a
    end
 
-fun bad_return5():float[30]
+fun bad_return5()
    a : int[40];
    b : float[30];
    n : int;

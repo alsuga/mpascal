@@ -8,4 +8,4 @@ fun foo(x:int)
         write(x)
     end
 
-
+// no puede llamar al padre!

@@ -1,4 +1,4 @@
-fun foo(x:int):int
+fun foo(x:int)
     begin
        if (x > 3) then return 3
 
@@ -7,7 +7,7 @@ fun foo(x:int):int
     end
 
 
-fun foo2(x:int):int
+fun foo2(x:int)
     begin
         while x > 0 do return 3
 
@@ -15,3 +15,4 @@ fun foo2(x:int):int
     end
         
 
+//Comprobar que si retorna fuera de eso.

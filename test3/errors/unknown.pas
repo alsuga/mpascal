@@ -1,6 +1,6 @@
 
 /* Not enough information to determined return type */
-fun foo(x:int):int
+fun foo(x:int)
    begin
       return foo(x-1)
    end

@@ -1,88 +1,5 @@
 # mpascheck.py
 # -*- coding: utf-8 -*-
-'''
-Proyecto 3 : Chequeo del Programa
-=================================
-En este proyecto es necesario realizar comprobaciones semánticas en su programa. 
-Hay algunos aspectos diferentes para hacer esto.
-
-En primer lugar, tendrá que definir una tabla de símbolos que haga un seguimiento
-de declaraciones de identificadores previamente declarados.  Se consultará la 
-tabla de símbolos siempre que el compilador necesite buscar información sobre 
-variables y declaración de constantes.
-
-A continuación, tendrá que definir los objetos que representen los diferentes 
-tipos de datos incorporados y registrar información acerca de sus capacidades.
-Revise el archivo mpastype.py.
-
-Por último, tendrá que escribir código que camine por el AST y haga cumplir un
-conjunto de reglas semánticas.  Aquí está una lista completa de todo los que
-deberá comprobar:
-
-1.  Nombres y símbolos:
-
-    Todos los identificadores deben ser definidos antes de ser usados.  Esto incluye variables, 
-    constantes y nombres de tipo.  Por ejemplo, esta clase de código genera un error:
-    
-       a = 3;              // Error. 'a' no está definido.
-       var a int;
-
-    Note: los nombres de tipo como "int", "float" y "string" son nombres incorporados que
-    deben ser definidos al comienzo de un programa (función).
-    
-2.  Tipos de constantes
-
-    A todos los símbolos constantes se le debe asignar un tipo como "int", "float" o "string".
-    Por ejemplo:
-
-       const a = 42;         // Tipo "int"
-       const b = 4.2;        // Tipo "float"
-       const c = "forty";    // Tipo "string"
-
-    Para hacer esta asignación, revise el tipo de Python del valor constante y adjunte el
-    nombre de tipo apropiado.
-
-3.  Chequeo de tipo operación binaria.
-
-    Operaciones binarias solamente operan sobre operandos del mismo tipo y produce un
-    resultado del mismo tipo.  De lo contrario, se tiene un error de tipo.  Por ejemplo:
-
-    var a int = 2;
-    var b float = 3.14;
-
-    var c int = a + 3;    // OK
-    var d int = a + b;    // Error.  int + float
-    var e int = b + 4.5;  // Error.  int = float
-
-4.  Chequeo de tipo operador unario.
-
-    Operadores unarios retornan un resultado que es del mismo tipo del operando.
-
-5.  Operadores soportados
-
-    Estos son los operadores soportados por cada tipo:
-
-    int:      binario { +, -, *, /}, unario { +, -}
-    float:    binario { +, -, *, /}, unario { +, -}
-    string:   binario { + }, unario { }
-
-    Los intentos de usar operadores no soportados debería dar lugar a un error.
-    Por ejemplo:
-
-    var string a = "Hello" + "World";     // OK
-    var string b = "Hello" * "World";     // Error (op no soportado *)
-
-6.  Asignación.
-
-    Los lados izquierdo y derecho de una operación de asignación deben ser 
-    declarados del mismo tipo.
-
-    Los valores sólo se pueden asignar a las declaraciones de variables, no
-    a constantes.
-
-Para recorrer el AST, use la clase NodeVisitor definida en mpasast.py.
-Un caparazón de código se proporciona a continuación.
-'''
 
 import sys, re, string, types
 from errors import error
@@ -92,10 +9,9 @@ import mpaslex
 
 class SymbolTable(object):
  
-  def __init__(self, parent=None,fun = None):
+  def __init__(self, parent=None):
     self.entries = {}
     self.parent = parent
-    self.actfun = fun
 
 #  def lookup(self, a):
 #    return self.entries.get(a)
@@ -120,10 +36,16 @@ class SymbolTable(object):
 
 
 class CheckProgramVisitor(NodeVisitor):
+  
+
   def __init__(self):
     # Inicializa la tabla de simbolos
     self.symtab = SymbolTable()
+    self.in_c = 0
+    self.actfun = ""
     self.func = {}
+    self.vecs = {}
+    self.ret = False
 
     # Agrega nombre de tipos incorporados ((int, float, string) a la tabla de simbolos
     self.symtab.add("int",mpastype.int_type)
@@ -149,16 +71,21 @@ class CheckProgramVisitor(NodeVisitor):
 
   def visit_WhileStatement(self, node):
     self.visit(node.cond)
+    self.in_c += 1
     if not node.cond.type == mpastype.boolean_type:
       error(node.lineno, "Tipo incorrecto para condicion while")
     else:
       self.visit(node.body)
+    self.in_c -= 1
 
   def visit_UnaryOp(self, node):
     self.visit(node.right)
     if not node.right.type == None:
       if not mpaslex.operators[node.op] in node.right.type.un_ops:
         error(node.lineno, "Operacion no soportada con este tipo")
+    elif hasattr(node.right,"pos") :
+      if not node.right.pos:
+        error(node.lineno, "No se pueden hacer este tipo de operacion con vectores")
     else:
       error(node.lineno, "Operacion invalida")
     node.type = node.right.type
@@ -166,9 +93,19 @@ class CheckProgramVisitor(NodeVisitor):
   def visit_BinaryOp(self, node):
     self.visit(node.left)
     self.visit(node.right)
-    if node.left.type != node.right.type:
+    if node.left.__class__.__name__ == "Location":
+      if self.vecs[self.actfun].has_key(node.left.id):
+        if node.left.pos == None and self.vecs[self.actfun][node.left.id]  >0: 
+          error(node.lineno, "No se pueden hacer este tipo de operacion con vectores")
+    if node.right.__class__.__name__ == "Location":
+      if self.vecs[self.actfun].has_key(node.left.id):
+        if node.right.pos == None and self.vecs[self.actfun][node.right.id]  > 0:
+          error(node.lineno, "No se pueden hacer este tipo de operacion con vectores")
+    if node.left.type == self.symtab.lookup("void") or node.right.type == self.symtab.lookup("void"):
+      node.type = self.symtab.lookup("void")
+    elif node.left.type != node.right.type:
       error(node.lineno, "No coinciden los tipos de los operandos en la operacion con '%s'" % node.op)
-    if node.left.type == None or node.right.type == None:
+    elif node.left.type == None or node.right.type == None:
       error(node.lineno, "Los operadores no tienen un tipo")
       node.type = self.symtab.lookup("void")
     else:
@@ -179,12 +116,18 @@ class CheckProgramVisitor(NodeVisitor):
 
   def visit_Assignment(self,node):
     self.visit(node.location)
+    if self.vecs[self.actfun].has_key(node.location.id):
+      if self.vecs[self.actfun][node.location.id] != 0 and not node.location.pos:
+          error(node.lineno, "No se puede asignar la expresion al vector %s" % node.location.id) 
     sym = self.symtab.lookup(node.location.id)
     if sym == None:
       error(node.lineno,"El id '%s' no ha sido definido" % node.location.id)
     self.visit(node.expression)
     if(sym != node.expression.type):
       error(node.lineno,"No coinciden los tipos en la asignacion '%s'" % node.location.id)
+    if(hasattr(node.expression,"pos")):
+      if not node.expression.pos and self.vecs[self.actfun][node.expression.id] > 0:
+        error(node.lineno, "Asignacion no permitida")
    
   # def visit_ConstDeclaration(self,node):
   #   # 1. Revise que el nombre de la constante no se ha definido
@@ -201,19 +144,24 @@ class CheckProgramVisitor(NodeVisitor):
       error(node.lineno, "Identificador '%s' ya definido" % node.id)
     else:
       self.symtab.add(node.id, self.looktype(node.typename))
-    if getattr(node,"size") != None :
+    self.vecs[self.actfun][node.id] = 0
+    if getattr(node,"size"):
       self.visit(getattr(node,"size"))
       if node.size.type != self.symtab.lookup("int"):
         error(node.lineno,"Tamaño del vector mal definido")
+      self.vecs[self.actfun][node.id] = node.size.value           
     node.type = self.symtab.lookup(node.typename)
 
   def visit_Location(self,node):
-    if node.pos:
-      self.visit(node.pos)
-      if node.pos.type != self.symtab.lookup("int") : 
-        error(node.lineno, "Acceso invalido al vector")
-    if self.symtab.lookup(node.id):
-      node.type = self.symtab.lookup(node.id)
+    if self.vecs[self.actfun].has_key(node.id):
+      if node.pos and self.vecs[self.actfun][node.id] == 0:
+          error(node.lineno, "El identificador '%s' no es un vector" % node.id)
+      if node.pos:
+        self.visit(node.pos)
+        if node.pos.type != self.symtab.lookup("int") : 
+          error(node.lineno, "Acceso invalido al vector")
+      if self.symtab.lookup(node.id):
+        node.type = self.symtab.lookup(node.id)
     else:
       error(node.lineno, "El identificador '%s' no ha sido definido" % node.id)
       node.type = self.symtab.lookup("void")
@@ -233,32 +181,55 @@ class CheckProgramVisitor(NodeVisitor):
     if self.symtab.lookup(node.id):
       error(node.lineno, "El identificador de la funcion '%s' ya esta definido" % node.id)
       pass
-    self.push_symtab(node.id)
+    self.push_symtab()
+    self.symtab.add(node.id, self.symtab.lookup("void"))
+    self.vecs[node.id] = {}
+    tmp = self.actfun
+    self.actfun = node.id
     for i in node.parameters.parameters:
       if i == None: break
       self.visit(i)
-      self.addfunc(node.id,i.type)
+      self.addfunc(node.id,i)
     self.visit(node.locals)
     self.check_return(node.statements)
     if self.symtab.entries.has_key("return"):
-      node.type = self.symtab.lookup("return") 
+      node.type = self.symtab.lookup("return")
     else:
       node.type = self.symtab.lookup("void")
     self.visit(node.statements)
     self.pop_symtab()
     self.symtab.entries[node.id] = node.type
+    self.actfun = tmp
+    if self.ret:
+      error(node.lineno, "No se puede identificar el tipo de dato de retorno")
+    self.ret = False
 
-  def visit_FunCall(self, node):
-    if self.symtab.lookup(node.id) == None:
+
+  def visit_FunCall(self, node):    
+    if not self.func.has_key(node.id):
       error(node.lineno, "Funcion '%s' no definida" % node.id)
+    if self.symtab.lookup(node.id) == self.symtab.lookup("void") : 
+      node.type = self.symtab.lookup("void")
+      pass
     if self.func.has_key(node.id):
-      for i,j in zip(node.parameters.expressions, self.func[node.id]):
-        self.visit(i)
-        if(i.type != j):
-          error(node.lineno, "Tipo erroneo de argumentos en el llamado a la funcion '%s'" % node.id)   
+      if(len(node.parameters.expressions) == len(self.func[node.id])):
+        for i,j in zip(node.parameters.expressions, self.func[node.id]):
+          self.visit(i)
+          if hasattr(i,"pos"):
+            if (self.vecs[self.actfun][i.id] > 0 and not getattr(i,"pos") and not getattr(j,"size"))or \
+            (self.vecs[self.actfun][i.id] == 0 and getattr(j,"size")) or \
+            (self.vecs[self.actfun][i.id] !=  self.vecs[node.id][j.id]):
+              error(node.lineno, "Tamaño de la variable incompatible en el llamado a la funcion '%s'" % node.id)
+          elif self.vecs[node.id][j.id] != 0 and getattr(j,"size"):
+              error(node.lineno, "Se espera un vector en el llamado a la funcion '%s'" % node.id)
+          if i.type != j.type :
+            error(node.lineno, "Tipo erroneo de argumentos en el llamado a la funcion '%s'" % node.id)
+      else :
+        error(node.lineno, "Numero erroneo de argumentos en el llamado a la funcion '%s'" % node.id)
     else:
       pass
     node.type = self.symtab.lookup(node.id)
+
 
   def visit_Parameters_Declaration(self, node):
     if(self.symtab.entries.has_key(node.id)):
@@ -266,6 +237,10 @@ class CheckProgramVisitor(NodeVisitor):
     else:
       node.type = self.symtab.lookup(node.typename)
       self.symtab.add(node.id,node.type)
+      if getattr(node,"size"):
+        self.vecs[self.actfun][node.id] = node.size.value
+      else:
+        self.vecs[self.actfun][node.id] = 0
 
   def visit_Group(self, node):
     self.visit(node.expression)
@@ -282,9 +257,12 @@ class CheckProgramVisitor(NodeVisitor):
 
   def visit_Return(self, node):
     self.visit(node.expression)
-    if not self.symtab.entries.has_key("return"):
-      self.symtab.add("return", node.expression.type)
-    elif(self.symtab.lookup("return") != node.expression.type):
+    self.ret = False
+    if (not self.symtab.entries.has_key("return")) or self.symtab.lookup("return")  == self.symtab.lookup("void"):
+      if(node.expression.type.name == "void"):
+        self.ret = True
+      self.symtab.entries["return"] =  node.expression.type
+    elif(self.symtab.lookup("return") != node.expression.type and node.expression.type != self.symtab.lookup("void")):
       error(node.lineno,"La funcion retorna dos tipos de dato distintos")
 
   def visit_Cast(self,node):
@@ -295,13 +273,33 @@ class CheckProgramVisitor(NodeVisitor):
       error(node.lineno,"Cast invalido")
       node.type = self.symtab.lookup("void")
 
+  def visit_Break(self,node):
+    if self.in_c == 0:
+      error(node.lineno, "Break fuerda de un ciclo")
+
+  def visit_Read(self,node):
+    self.visit(node.location)
+    if self.vecs[self.actfun][node.location.id] > 0 and not getattr(node.location,"pos"):
+      error(node.lineno, "No se puede leer a un vector")
+
+  def visit_Write(self,node):
+    self.visit(node.expression)
+    if node.expression.type == self.symtab.lookup("void"):
+        error(node.lineno, "No se puede escribir esta expresion")
+    if hasattr(node.expression,"pos"):
+      if not self.vecs[self.actfun].has_key(node.expression.id):
+        pass
+      elif self.vecs[self.actfun][node.expression.id] > 0 and not getattr(node.expression,"pos"):
+        error(node.lineno, "No se puede escribir un vector")
+
+
   def visit_Empty(self, node):
     pass
 
   def check_return(self, node):
     if hasattr(node,"statements"):
       for i in node.statements:
-        if i.__class__.__name__ == "return" :
+        if i.__class__.__name__ == "Return" :
           self.visit_Return(i)
         elif hasattr(i,"statements"): 
           self.check_return(i.statements)
@@ -309,8 +307,9 @@ class CheckProgramVisitor(NodeVisitor):
           self.check_return(i.then_b)
         elif hasattr(i,"else_b") :
           self.check_return(i.else_b)
-    elif node.__class__.__name__ == "return" :
-      self.visit_Return(i)
+    elif node.__class__.__name__ == "Return" :
+      self.visit_Return(node)
+    self.ret = False
 
   def addfunc(self,key,value):
     if self.func.has_key(key):

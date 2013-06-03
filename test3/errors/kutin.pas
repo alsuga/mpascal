@@ -1,6 +1,6 @@
 /* how not to compute n mod 2 */
-fun foo(n:int):int
-        fun bar(n:int):int
+fun foo(n:int)
+        fun bar(n:int)
         begin
                 return foo(n-1)
         end;

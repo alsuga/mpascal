@@ -1,6 +1,6 @@
-fun bogus_fact(a:int):float
-  fun bogus_nested(b:int):float
-     a:float;
+fun bogus_fact(a:int)
+  fun bogus_nested(b:int)
+     c:float;
      begin
      /* this return sets rettype of bogus_nested to float
  	and bogus_fact to float */

@@ -1,4 +1,4 @@
-fun bar(a:int, b:float):float
+fun bar(a:int, b:float)
   z:int;
   fun spam(a:int)
     i:int;

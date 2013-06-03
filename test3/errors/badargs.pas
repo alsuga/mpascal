@@ -1,4 +1,4 @@
-fun foo(x:int,y:int):int
+fun foo(x:int,y:int)
     begin
        return x + y
     end
