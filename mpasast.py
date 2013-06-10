@@ -77,8 +77,8 @@ class Statements(AST):
   def append(self,e):
     self.statements.append(e)
 
-class ConstDeclaration(AST):
-  _fields = ['id', 'typename']
+#class ConstDeclaration(AST):
+#  _fields = ['id', 'typename']
 
 @validate_fields(locals=list)
 class Locals(AST):

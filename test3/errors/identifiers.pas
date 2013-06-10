@@ -20,3 +20,5 @@ fun main() begin
     spam(3); /* unknown identifier */
     writeln(4) /* unknown id */
   end
+
+{ funcion spam no deberia ser accesible }

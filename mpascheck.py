@@ -12,6 +12,7 @@ class SymbolTable(object):
   def __init__(self, parent=None):
     self.entries = {}
     self.parent = parent
+    self.func = {}
 
 #  def lookup(self, a):
 #    return self.entries.get(a)
@@ -24,6 +25,15 @@ class SymbolTable(object):
         value.type.get_string():
         raise Symtab.SymbolConflictError()
     self.entries[name] = value
+
+  def lookfun(self, name):
+    if self.func.has_key(name):
+      return self.func[name]
+    else:
+      if self.parent != None:
+        return self.parent.lookfun(name)
+      else:
+        return None
 
   def lookup(self, name):
     if self.entries.has_key(name):
@@ -43,7 +53,6 @@ class CheckProgramVisitor(NodeVisitor):
     self.symtab = SymbolTable()
     self.in_c = 0
     self.actfun = ""
-    self.func = {}
     self.vecs = {}
     self.ret = False
 
@@ -98,7 +107,7 @@ class CheckProgramVisitor(NodeVisitor):
         if node.left.pos == None and self.vecs[self.actfun][node.left.id]  >0: 
           error(node.lineno, "No se pueden hacer este tipo de operacion con vectores")
     if node.right.__class__.__name__ == "Location":
-      if self.vecs[self.actfun].has_key(node.left.id):
+      if self.vecs[self.actfun].has_key(node.right.id):
         if node.right.pos == None and self.vecs[self.actfun][node.right.id]  > 0:
           error(node.lineno, "No se pueden hacer este tipo de operacion con vectores")
     if node.left.type == self.symtab.lookup("void") or node.right.type == self.symtab.lookup("void"):
@@ -178,11 +187,12 @@ class CheckProgramVisitor(NodeVisitor):
       node.type = self.symtab.lookup("string")
 
   def visit_Funcdecl(self, node):
+    tm = False
     if self.symtab.lookup(node.id):
       error(node.lineno, "El identificador de la funcion '%s' ya esta definido" % node.id)
-      pass
+      return
+    self.symtab.add(node.id, self.symtab.lookup("void"))s
     self.push_symtab()
-    self.symtab.add(node.id, self.symtab.lookup("void"))
     self.vecs[node.id] = {}
     tmp = self.actfun
     self.actfun = node.id
@@ -191,7 +201,7 @@ class CheckProgramVisitor(NodeVisitor):
       self.visit(i)
       self.addfunc(node.id,i)
     self.visit(node.locals)
-    self.check_return(node.statements)
+    tm = self.check_return(node.statements)
     if self.symtab.entries.has_key("return"):
       node.type = self.symtab.lookup("return")
     else:
@@ -202,18 +212,19 @@ class CheckProgramVisitor(NodeVisitor):
     self.actfun = tmp
     if self.ret:
       error(node.lineno, "No se puede identificar el tipo de dato de retorno")
+    if not tm and self.symtab.lookup(node.id).name != "void":
+      error(node.lineno, "No se retorna en todas las sentencias de desicion")
     self.ret = False
 
-
   def visit_FunCall(self, node):    
-    if not self.func.has_key(node.id):
+    if not self.symtab.lookfun(node.id):
       error(node.lineno, "Funcion '%s' no definida" % node.id)
     if self.symtab.lookup(node.id) == self.symtab.lookup("void") : 
       node.type = self.symtab.lookup("void")
       pass
-    if self.func.has_key(node.id):
-      if(len(node.parameters.expressions) == len(self.func[node.id])):
-        for i,j in zip(node.parameters.expressions, self.func[node.id]):
+    if self.symtab.lookfun(node.id):
+      if(len(node.parameters.expressions) == len(self.symtab.lookfun(node.id))):
+        for i,j in zip(node.parameters.expressions, self.symtab.lookfun(node.id)):
           self.visit(i)
           if hasattr(i,"pos"):
             if (self.vecs[self.actfun][i.id] > 0 and not getattr(i,"pos") and not getattr(j,"size"))or \
@@ -298,24 +309,35 @@ class CheckProgramVisitor(NodeVisitor):
 
   def check_return(self, node):
     if hasattr(node,"statements"):
+      tmp = False
+      ret = False
+      ifs = False
       for i in node.statements:
         if i.__class__.__name__ == "Return" :
           self.visit_Return(i)
-        elif hasattr(i,"statements"): 
-          self.check_return(i.statements)
+          ret = True
+        elif hasattr(i,"body"): 
+          tmp = self.check_return(i.body)
         elif hasattr(i,"then_b") : 
-          self.check_return(i.then_b)
-        elif hasattr(i,"else_b") :
-          self.check_return(i.else_b)
+          ifs = self.check_return(i.then_b)
+          if getattr(i,"else_b") :
+            temporal = self.check_return(i.else_b)
+            ifs = (not ifs and temporal) or (ifs and not temporal)
+      if ret:
+        return True
+      elif tmp or ifs:
+        return False
+      else :
+        return True
     elif node.__class__.__name__ == "Return" :
       self.visit_Return(node)
-    self.ret = False
+    return True
 
   def addfunc(self,key,value):
-    if self.func.has_key(key):
-      self.func[key].append(value)
+    if self.symtab.parent.func.has_key(key):
+      self.symtab.parent.func[key].append(value)
     else:
-      self.func[key] = [value]
+      self.symtab.parent.func[key] = [value]
 
   def looktype(self,at):
     at_type = at + "_type"
