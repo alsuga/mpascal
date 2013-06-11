@@ -191,7 +191,7 @@ class CheckProgramVisitor(NodeVisitor):
     if self.symtab.lookup(node.id):
       error(node.lineno, "El identificador de la funcion '%s' ya esta definido" % node.id)
       return
-    self.symtab.add(node.id, self.symtab.lookup("void"))s
+    self.symtab.add(node.id, self.symtab.lookup("void"))
     self.push_symtab()
     self.vecs[node.id] = {}
     tmp = self.actfun
