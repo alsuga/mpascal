@@ -4,8 +4,8 @@ bin_ops = {
   '-' : 'SUB',
   '*' : 'MUL',
   '/' : 'DIV',
-  '<' : 'L',
-  '>' : 'G',
+  '<' : 'LW',
+  '>' : 'GT',
   '==': 'EQ',
   '!=': 'NE',
   '<=': 'LE',
@@ -79,10 +79,15 @@ def emit_break(out,s):
 
 def emit_assignment(out,s):
   print >>out, "\n! assignment(start)"
+  eval_expression(out,s.expression)
+  print >>out, "!   %s := pop" %s.location.id
   print >>out, "! assignment (end)"
 
 def emit_print(out,s):
   print >>out, "\n! print (start)"
+  # eval_expression(s.expression)
+  # print >>out, "!   expr := pop"
+  # print >>out, "!   print(expr)"
   print >>out, "! print (end)"
 
 def emit_read(out,s):
@@ -91,19 +96,32 @@ def emit_read(out,s):
 
 def emit_write(out,s):
   print >>out, "\n! write (start)"
+  eval_expression(out,s.expression)
+  print >>out, "!   expr := pop"
+  print >>out, "!   write(expr)"
   print >>out, "! write (end)"
 
 def emit_while(out,s):
   print >>out, "\n! while (start)"
+  eval_expression(out,s.cond)
+  print >>out, "!   relop := pop"
   emit_statements(out,s.body)
-  print >>out, "! while (end)"
+  print >>out, "\n! while (end)"
 
 def emit_if(out,s):
   print >>out, "\n! if (start)"
-  print >>out, "! if (end)"
+  eval_expression(out,s.cond)
+  print >>out, "!   relop := pop"
+  emit_statements(out,s.then_b)
+  print >>out, "! else"
+  if s.else_b:
+    emit_statements(out,s.else_b)
+  print >>out, "\n! if (end)"
 
 def emit_return(out,s):
   print >>out, "\n! return (start)"
+  eval_expression(out,s.expression)
+
   print >>out, "! return (end)"
 
 def eval_expression(out,expr):
@@ -119,7 +137,8 @@ def eval_expression(out,expr):
     eval_expression(out,expr.left)
     eval_expression(out,expr.right)
     print >>out, "!   %s" % bin_ops[expr.op]
-  elif expr.__class__.__name__ == "UnaryOp"
+  elif expr.__class__.__name__ == "UnaryOp":
     eval_expression(our,expr.left)
     print >>out, "!   %s" % un_ops[expr.op]
-  elif expr.__class__.__name__ == "FunCall"
+  elif expr.__class__.__name__ == "Group":
+    eval_expression(out,expr.expression)
