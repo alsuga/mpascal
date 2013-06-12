@@ -2,27 +2,30 @@ import StringIO
 data = StringIO.StringIO()
 
 bin_ops = {
-  '+' : 'ADD',
-  '-' : 'SUB',
-  '*' : 'MUL',
-  '/' : 'DIV',
-  '<' : 'LW',
-  '>' : 'GT',
-  '==': 'EQ',
-  '!=': 'NE',
-  '<=': 'LE',
-  '>=': 'GE',
-  'and': 'AND',
-  'or': 'OR',
+  '+' : 'add',
+  '-' : 'sub',
+  '*' : 'mul',
+  '/' : 'div',
+  '<' : 'bl',
+  '>' : 'bg',
+  '==': 'be',
+  '!=': 'bne',
+  '<=': 'ble',
+  '>=': 'bge',
+  'and': 'and',
+  'or': 'or',
 }
 
 un_ops = {
   '+' : 'uadd',
-  '-' : 'usub',
-  'not' : 'lnot',
+  '-' : 'sub',
+  'not' : 'not',
 }
 
 cont = -1
+sp_cont = 64
+l_cont = 0
+t_cont = 0
 
 def generate(out,top):
   print >>out, "! Creado por mpascal.py"
@@ -40,15 +43,18 @@ def emit_program(out,top):
 
 def emit_function(out,func):
   print >>out,"\n! function: %s (start) " % func.id
-  print >>out,"    .global %s \n" % func.id
+  print >>out,"\n    .global %s \n" % func.id
   print >>out,"%s: \n" % func.id
-  ac = 96
-  for i in func.locals:
-    if hasattr(i.size):
-      ac += int(i.size) * 4
-    else:
-      ac += 4
-  print >>out,"   SAVE %sp, -%s, %sp" %ac
+  ac = 64
+  if func.locals:
+    for i in func.locals:
+      if hasattr(i.size):
+        ac += int(i.size) * 4
+      else:
+        ac += 4
+  while ac % 8 != 0:
+    ac += 1
+  print >>out,"   SAVE %%sp, -%s, %%sp" % ac
   label = new_label()
   emit_statements(out, func.statements)
   print >> out, "\n%s:" % label
@@ -105,6 +111,10 @@ def emit_print(out,s):
   print >>out, "\n! print (start)"
   label = new_label()
   print >> data, '%s:      .asciz "%s" ' % (label, s.literal.value)
+  print >>out, "         sethi %%hi(%s)" % label
+  print >>out, "         or %%o0, %%lo(%s), %%o0" % label
+  print >>out, "         call flprint"
+  print >>out, "         nop"
   # eval_expression(s.expression)
   # print >>out, "!   expr := pop"
   # print >>out, "!   print(expr)"
@@ -112,12 +122,29 @@ def emit_print(out,s):
 
 def emit_read(out,s):
   print >>out, "\n! read (start)"
+  if s.location.type.name == "int":
+    print >>out, "! call flreadi (int)"
+    print >>out, "         call flreadi"
+  else:
+    print >>out, "! call flreadf (float)"
+    print >>out, "         call flreadf"
+  print >>out, "         nop"
+  print >>out, "         st %o0, result"
   print >>out, "! read (end)"
 
 def emit_write(out,s):
   print >>out, "\n! write (start)"
   eval_expression(out,s.expression)
-  print >>out, "!   expr := pop"
+  #print >>out, "!   expr := pop"
+  if s.expression.type.name == "int":
+    print >>out, "! call flwritei (int)"
+    print >>out, "         mov val, %o0"
+    print >>out, "         call flwritei"
+  else:
+    print >>out, "! call flwritef (float)"
+    print >>out, "         mov val, %o0"
+    print >>out, "         call flwritef"
+  print >>out, "         nop"
   print >>out, "!   write(expr)"
   print >>out, "! write (end)"
 
@@ -163,14 +190,43 @@ def eval_expression(out,expr):
     else:
       print >>out, "!   push %s" %expr.id
   elif expr.__class__.__name__ == "Literal":
-    print >>out, "!   push %s" %expr.value
+    print >> out, '     mov %s, %s               ! push %s' %(expr.value,push(out),expr.value)
   elif expr.__class__.__name__ == "BinaryOp":
     eval_expression(out,expr.left)
-    eval_expression(out,expr.right)
-    print >>out, "!   %s" % bin_ops[expr.op]
+    eval_expression(out,expr.right) 
+    r = pop(out)
+    l = pop(out)
+    if expr.op == "*" or expr.op == "/":
+      tmp = push(out)
+      print >>out, "     mov %s,%%o0" %l
+      print >>out, "     call .%s                ! %s %s %s -> %s" % (bin_ops[expr.op],l,expr.op,r,tmp)
+      print >>out, "     mov %s,%%o1" %r
+      print >>out, "     mov %%o0, %s             ! push" % tmp
+    else:
+      tmp = push(out)
+      print >>out, "     %s %s, %s, %s        ! %s %s %s -> %s" %(bin_ops[expr.op],l,r,tmp,l,expr.op,r,tmp)
+  else expr.__class__.__name__ == "Relation":
+    eval_expression(out,expr.left)
+    eval_expression(out,expr.right) 
+    r = pop(out)
+    l = pop(out)
+    if expr.op == "and" or expr.op == "or":
+      tmp = push(out)
+      print >>out, "     %s %s, %s, %s        ! %s %s %s -> %s" %(bin_ops[expr.op],l,r,tmp,l,expr.op,r,tmp)
+    else:
+      tmp = push(out)
+      print >>out, "\n! %s" %(expr.op)
+      print >>out, "     cmp %s, %s           ! if %s %s %s -> %s" %(l,r,l,expr.op,r,tmp)
+      print >>out, "    %s labels" %(bin_ops[expr.op])
   elif expr.__class__.__name__ == "UnaryOp":
     eval_expression(our,expr.left)
-    print >>out, "!   %s" % un_ops[expr.op]
+    l = pop(out)
+    if expr.op == "not":
+      tmp = push(out)
+      print >>out, "     neg %s, %s        ! -%s -> %s" %(l,tmp,l,tmp)
+    else:
+      tmp = push(out)
+      print >>out, "     %s 0, %s, %s        ! %s %s -> %s" %(un_ops[expr.op],l,tmp,expr.op,l,tmp)
   elif expr.__class__.__name__ == "Group":
     eval_expression(out,expr.expression)
   elif expr.__class__.__name__ == "FunCall":
@@ -192,3 +248,34 @@ def new_label():
   global cont
   cont+=1
   return ".L%s" % cont
+
+def push(out):
+    global l_cont
+    global t_cont
+    global sp_cont
+    if l_cont < 8 and t_cont != 8:
+        l = '%l'+str(l_cont)
+        l_cont +=1        
+    else:
+        if l_cont == 8:
+            l_cont = 0
+            t_cont = 8
+        l = '%l'+str(l_cont)
+        print >> out, "     st %s, [%%fp -%d]" % (l, sp_cont)
+        sp_cont +=4
+        l_cont +=1        
+    return l
+    
+def pop(out):
+    global l_cont
+    global t_cont
+    global sp_cont
+    if l_cont >= 0 and t_cont == 0:
+        l_cont -=1
+        l = '%l'+str(l_cont)
+    else:
+        l_cont = t_cont
+        t_cont = 0
+        l_cont -=1
+        l = '%l'+str(l_cont)
+    return l
