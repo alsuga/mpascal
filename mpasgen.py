@@ -1,3 +1,5 @@
+import StringIO
+data = StringIO.StringIO()
 
 bin_ops = {
   '+' : 'ADD',
@@ -20,26 +22,29 @@ un_ops = {
   'not' : 'lnot',
 }
 
+cont = -1
 
-def generate(file,top):
-  print >>file, "! Creado por mpascal.py"
-  print >>file, "! Alejandro Suarez- David Escobar, IS744 (2013-1)"
+def generate(out,top):
+  print >>out, "! Creado por mpascal.py"
+  print >>out, "! Alejandro Suarez- David Escobar, IS744 (2013-1)"
+  print >>out, "   .section     \".text\""
+  print >>data,"\n    .section \".rodata\" \n"
+
 
 def emit_program(out,top):
   print >>out,"\n! program"
   for i in top.function:
     emit_function(out,i)
+  print >>out, data.getvalue()
+
 
 def emit_function(out,func):
   print >>out,"\n! function: %s (start) " % func.id
-  #print >>out,"    .global %s \n" % func.id
-  #print >>out,"%s: \n" % func.id
-  #label = new_label()
-  #sttms = func.children[2].children
-  #args = func.children[0].children
-  #local = func.children[1].children
+  print >>out,"    .global %s \n" % func.id
+  print >>out,"%s: \n" % func.id
+  label = new_label()
   emit_statements(out, func.statements)
-  #print >> out, "\n%s:" % label
+  print >> out, "\n%s:" % label
   #if func.leaf =="main":
   #  print >> out, "     mov 0, %o0"
   #  print >> out, "     call_exit "
@@ -49,25 +54,31 @@ def emit_function(out,func):
   print >>out,"\n! function: %s (end) " % func.id
 
 def emit_statements(out,statements):
-  for s in statements.statements:
-      if s.__class__.__name__ == 'Print':
-        emit_print(out,s)
-      elif s.__class__.__name__ == 'Read':
-        emit_read(out,s)
-      elif s.__class__.__name__ == 'Write':
-        emit_write(out,s)
-      elif s.__class__.__name__ == 'IfStatement':
-        emit_if(out,s)
-      elif s.__class__.__name__ == 'WhileStatement':
-        emit_while(out,s)
-      elif s.__class__.__name__ == 'Assignment':
-        emit_assignment(out,s)
-      elif s.__class__.__name__ == 'Skip':
-        emit_skip(out,s)
-      elif s.__class__.__name__ == 'Break':
-        emit_break(out,s)
-      elif s.__class__.__name__ == 'Return':
-        emit_return(out,s)
+  if hasattr(statements,"statements"):
+    for s in statements.statements:
+      emit_statemet(out,s)
+  else:
+    emit_statemet(out,statements)
+
+def emit_statemet(out,s):  
+  if s.__class__.__name__ == 'Print':
+    emit_print(out,s)
+  elif s.__class__.__name__ == 'Read':
+    emit_read(out,s)
+  elif s.__class__.__name__ == 'Write':
+    emit_write(out,s)
+  elif s.__class__.__name__ == 'IfStatement':
+    emit_if(out,s)
+  elif s.__class__.__name__ == 'WhileStatement':
+    emit_while(out,s)
+  elif s.__class__.__name__ == 'Assignment':
+    emit_assignment(out,s)
+  elif s.__class__.__name__ == 'Skip':
+    emit_skip(out,s)
+  elif s.__class__.__name__ == 'Break':
+    emit_break(out,s)
+  elif s.__class__.__name__ == 'Return':
+    emit_return(out,s)
 
 def emit_skip(out,s):
   print >>out, "\n! skip (start)"
@@ -85,6 +96,8 @@ def emit_assignment(out,s):
 
 def emit_print(out,s):
   print >>out, "\n! print (start)"
+  label = new_label()
+  print >> data, '%s:      .asciz "%s" ' % (label, s.literal.value)
   # eval_expression(s.expression)
   # print >>out, "!   expr := pop"
   # print >>out, "!   print(expr)"
@@ -103,25 +116,36 @@ def emit_write(out,s):
 
 def emit_while(out,s):
   print >>out, "\n! while (start)"
+  test_label= new_label()
+  done_label= new_label()
+  print >>out, "\n%s:\n" % test_label
   eval_expression(out,s.cond)
   print >>out, "!   relop := pop"
+  print >>out, "!   if not relop: goto %s" %done_label
   emit_statements(out,s.body)
-  print >>out, "\n! while (end)"
+  print >>out, "\n!   goto %s" %test_label
+  print >>out, "\n%s:\n" % done_label
+  print >>out, "! while (end)"
 
 def emit_if(out,s):
   print >>out, "\n! if (start)"
   eval_expression(out,s.cond)
+  else_label= new_label()
+  next_label= new_label()
   print >>out, "!   relop := pop"
+  print >>out, "!   if not relop: goto %s" % else_label
   emit_statements(out,s.then_b)
-  print >>out, "! else"
+  print >>out, "\n!   goto %s" %next_label
+  print >>out, "\n%s:\n" %else_label
   if s.else_b:
     emit_statements(out,s.else_b)
-  print >>out, "\n! if (end)"
+  print >>out, "\n%s:\n" %next_label
+  print >>out, "! if (end)"
 
 def emit_return(out,s):
   print >>out, "\n! return (start)"
   eval_expression(out,s.expression)
-
+  print >>out, "!   ret := pop"
   print >>out, "! return (end)"
 
 def eval_expression(out,expr):
@@ -142,3 +166,22 @@ def eval_expression(out,expr):
     print >>out, "!   %s" % un_ops[expr.op]
   elif expr.__class__.__name__ == "Group":
     eval_expression(out,expr.expression)
+  elif expr.__class__.__name__ == "FunCall":
+    num = 1
+    for i in expr.parameters.expressions:
+      eval_expression(out,i)
+      print >>out, "!   arg%s := pop" % str(num)
+      num += 1
+    a = "!   push %s(" %expr.id
+    for i in xrange(1,num-1):
+      a += "arg%s," % str(i)
+    if num > 0:
+      a+= "arg%s" % str(num-1)
+    a += ")"
+    print >>out, "%s" % a
+
+
+def new_label():
+  global cont
+  cont+=1
+  return ".L%s" % cont
