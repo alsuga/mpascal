@@ -1,118 +1,10 @@
 #!/usr/bin/env python
 # mpaslex.py
-r'''
-Proyecto 1 - Escribir un Lexer
-==============================
-En este primer proyecto, se va a escribir un sencillo lexer para un
-lenguaje como mpascal.  El proyecto se presenta como codigo que se
-debe leer y completar (este archivo).  Por favor, lea el contenido
-completo de este archivo y cuidadosamente siga los pasos indicados
-por los comentarios.
 
-Resumen:
---------
-El proceso del analisis lexico consiste en tomar una entrada y dividirla
-en un flujo de tokens (simbolos). Cada token es como una palabra valida
-del diccionario.  Esencialmente, la funcion del analizador lexico es
-simplemente asegurar que el texto de entrada se compone de simbolos validos
-antes de cualquier procesamiento adicional relacionado con el parsing 
-(analisis sintatico).
-
-Cada token esta definido por una expresion regular.  Por lo tanto, su
-tarea principal en este primer proyecto es definir un conjunto de expresiones
-regulares para el lenguaje.  El trabajo actual del analizador lexico es
-manejado por PLY (http://www.dabeaz.com/ply).
-
-
-Especificacion:
----------------
-Su lexer debera reconocer los siguientes simbolos y tokens.  El nombre de la
-izquierda es el nombre del token, el valor de la derecha es el texto coincidente.
-
-Palabras Reservadas:
-    CONST   : 'const'
-    VAR     : 'var'  
-    PRINT   : 'print'
-    FUNC    : 'func'
-    EXTERN  : 'extern'
-
-Identificadores:  (Las mismas reglas que para Python)
-    ID      : Texto que comience con una letra o '_', seguido de cualquier numero
-              numero de letras, digitos o guion bajo.
-
-Operadores y Delimitadores:
-    PLUS    : '+'
-    MINUS   : '-'
-    TIMES   : '*'
-    DIVIDE  : '/'
-    ASSIGN  : '='
-    SEMI    : ';'
-    LPAREN  : '('
-    RPAREN  : ')'
-    COMMA   : ','
-
-Literales:
-    INTEGER : '123'   (decimal)
-              '0123'  (octal)
-              '0x123' (hex)
-
-    FLOAT   : '1.234'
-              '1.234e1'
-              '1.234e+1'
-              '1.234e-1'
-              '1e2'
-              '.1234'
-              '1234.'
-
-    STRING  : '"Hola Mundo\n"'
-
-Comentarios:  Deben ser ignorados por su analizador lexico
-     //             Salta el resto de la linea
-     /* ... */      Salta un bloque (anidacion no permitida)
-
-Errores: Su lexer debera reportar los siguientes mensajes de error:
-
-     lineno: Ilegal char 'c'
-     lineno: Cadena no terminada
-     lineno: Comentario sin terminar
-     lineno: Codigo de escape malo en cadena '\..'
-
-Pruebas
--------
-Para el desarrollo inicial, intente ejecutar el lexer con un archivo de 
-entrada de ejemplo como:
-
-     bash % python mpaslex.py sample.pas
-
-Estudie cuidadosamente la salida del lexer y asegurese que tiene sentido.
-Una vez que este razonablemente satisfecho con el resultado, trate de 
-ejecutarlos con algunas pruebas mas dificiles:
-
-     bash % python mpaslex.py testlex1.pas
-     bash % python mpaslex.py testlex2.pas
-
-Bonos: Que haria usted para convertir estas pruebas en pruebas unitarias
-adecuadas?
-'''
-
-# ----------------------------------------------------------------------
-# El siguiente import carga la funcion errror(lineno,msg) que debe ser
-# usada para reportar todos los mensajes de error emitidos por su lexer.
-# Pruebas unitarias y otras caracteristicas del compilador se apoyaran
-# en esta funcion.  Revise el archivo errors.py para mas documentacion
-# acerca del mecanismo del control de errores.
 from errors import error
 
-# ----------------------------------------------------------------------
-# Analizadores lexicos son definidos usando la libreria ply.lex
-#
-# Vea http://www.dabeaz.com/ply/ply.html#ply_nn3
 from ply.lex import lex
 
-# ----------------------------------------------------------------------
-# Lista de token. Esta lista identifica la lista completa de nombres de
-# token que deben ser reconocidos por su lexer.  No cambie ninguno de 
-# estos nombres. Haciendolo se rompera las pruebas unitarias.
 
 tokens = [
   # keywords
@@ -138,18 +30,7 @@ tokens = [
   'TYPENAME',
 ]
 
-# ----------------------------------------------------------------------
-# Ignorando caracteres (whitespace)
-#
-# Los siguientes caracteres son ignorados completamente por el lexer.
-# No lo cambie.
-
 t_ignore = ' \t\r'
-
-# ----------------------------------------------------------------------
-# *** DEBE COMPLETAR : Escriba las regexpsindicadas a continuacion ***
-# 
-# Tokens para simbolos sencillos: + - * / = ( ) ;
 
 t_PLUS      = r'\+'
 t_MINUS     = r'-'

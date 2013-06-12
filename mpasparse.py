@@ -2,6 +2,7 @@ from ply import yacc
 from errors import error
 from mpaslex import tokens
 from mpasast import *
+import mpaslex
 
 precedence = (
     ('left', 'LOR'),
@@ -89,12 +90,6 @@ def p_statement(p):
         p[0] = p[1]
         p[0].lineno = p[1].lineno
 
-#def p_const_declaration(p):
-#    '''
-#    const_declaration : CONST id ASSIGN expression 
-#    '''
-#    p[0] = ConstDeclaration(p[2],p[4])
-
 def p_locals(p):
     '''
     locals : locals local SEMI
@@ -161,11 +156,6 @@ def p_fundecl(p):
     function : FUNC ID LPAREN parameters RPAREN locals BEGIN statements END
     '''
     p[0] = Funcdecl(p[2], p[4], p[6], p[8], lineno=p.lineno(1)) 
-
-#nueva, no cambia el arbol
-# def p_FunctionError1(p):
-#     'function : FUNC ID LPAREN parameters RPAREN BEGIN statements END SEMI' 
-#     sys.stderr.write("Error en %d: Mala definicion de declaracion. Sobra un ';' \n" % (lexer.lineno-1))
 
 def p_fundecl_1(p):
     '''
@@ -272,15 +262,6 @@ def p_return(p):
     '''
     p[0] = Return(p[2], lineno=p.lineno(1))
 
-# def p_returnError(p):
-#     '''
-#     return : RETURN statement
-#     '''
-#     error(p.lineno,"No se soporta el retorno de 'statements' con RETURN")
-#     p[0] = Return(p[2])
-#     pass
-
-
 def p_read(p):
     '''
     read : READ LPAREN location RPAREN 
@@ -368,17 +349,6 @@ def p_cond(p):
     elif (len(p) == 3):
         p[0] = UnaryOp('not',p[2], lineno=p.lineno(1))
 
-#se omiten los tipos de dato bool por ahora
-
-# def p_cond_1(p):
-#     '''
-#     cond : location
-#           | BOOL
-#     ''' 
-#     p[0] = p[1]
-
-#se agregan las agrupaciones de los cond
-
 def p_cond_1(p):
     '''
     cond : LPAREN cond RPAREN
@@ -407,13 +377,6 @@ def p_exprlist(p):
     p[0] = p[1]
     p[0].lineno = p[1].lineno
 
-# def p_exprlistError(p):
-#     '''
-#     exprlist :  exprlist expression
-#     '''
-#     p[0] = p[1]
-#     error(p.lineno,"Falta en el uso de ',' entre expressiones")
-
 def p_exprlist_1(p):
     '''
     exprlist : expression
@@ -421,7 +384,6 @@ def p_exprlist_1(p):
     '''
     p[0] = ExprList([p[1]], lineno=p.lineno(1))
 
-#se quital los literales bool
 
 def p_literal(p):
     '''
@@ -463,13 +425,13 @@ def p_empty(p):
 
 def p_error(p):
     if p:
-        #error(p.lineno,"Error: %s" %p)
         error(p.lineno, "Error de sintaxis en el token '%s'" % p.value)
     else:
         error("EOF","Error de sintaxis, fin de entrada.")
 
 def make_parser():
-    parser = yacc.yacc()
+    lexer = mpaslex.make_lexer()
+    parser = yacc.yacc(debug = 1)
     return parser
 
 

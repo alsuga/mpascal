@@ -178,28 +178,6 @@ class Empty(AST):
 
 # NO MODIFIQUE
 class NodeVisitor(object):
-  '''
-  Clase para visitar nodos del árbol de sintaxis.  Se modeló a partir
-  de una clase similar en la librería estándar ast.NodeVisitor.  Para
-  cada nodo, el método visit(node) llama un método visit_NodeName(node)
-  el cual debe ser implementado en la subclase.  El método genérico
-  generic_visit() es llamado para todos los nodos donde no hay coincidencia
-  con el método visit_NodeName().
-  
-  Es es un ejemplo de un visitante que examina operadores binarios:
-
-    class VisitOps(NodeVisitor):
-      visit_Binop(self,node):
-        print("Operador binario", node.op)
-        self.visit(node.left)
-        self.visit(node.right)
-      visit_Unaryop(self,node):
-        print("Operador unario", node.op)
-        self.visit(node.expr)
-
-    tree = parse(txt)
-    VisitOps().visit(tree)
-  '''
 
   def visit(self,node):
     '''
