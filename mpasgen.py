@@ -42,15 +42,22 @@ def emit_function(out,func):
   print >>out,"\n! function: %s (start) " % func.id
   print >>out,"    .global %s \n" % func.id
   print >>out,"%s: \n" % func.id
+  ac = 96
+  for i in func.locals:
+    if hasattr(i.size):
+      ac += int(i.size) * 4
+    else:
+      ac += 4
+  print >>out,"   SAVE %sp, -%s, %sp" %ac
   label = new_label()
   emit_statements(out, func.statements)
   print >> out, "\n%s:" % label
-  #if func.leaf =="main":
-  #  print >> out, "     mov 0, %o0"
-  #  print >> out, "     call_exit "
-  #  print >> out, "     nop"
-  #print >> out, "     ret"
-  #print >> out, "     restore"
+  if func.id =="main":
+    print >> out, "     mov 0, %o0"
+    print >> out, "     call_exit "
+    print >> out, "     nop"
+  print >> out, "     ret"
+  print >> out, "     restore"
   print >>out,"\n! function: %s (end) " % func.id
 
 def emit_statements(out,statements):
