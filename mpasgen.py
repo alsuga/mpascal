@@ -47,23 +47,24 @@ def emit_function(out,func):
   print >>out,"%s: \n" % func.id
   ac = 64
   if func.locals:
-    for i in func.locals:
-      if hasattr(i.size):
-        ac += int(i.size) * 4
-      else:
-        ac += 4
+    for i in func.locals.locals:
+      if i.__class__.__name__ == "Local":
+        if i.size:
+          ac += int(i.size.value) * 4
+        else:
+          ac += 4
   while ac % 8 != 0:
     ac += 1
-  print >>out,"   SAVE %%sp, -%s, %%sp" % ac
+  print >>out,"    save %%sp, -%s, %%sp" % ac
   label = new_label()
   emit_statements(out, func.statements)
   print >> out, "\n%s:" % label
   if func.id =="main":
-    print >> out, "     mov 0, %o0"
-    print >> out, "     call_exit "
-    print >> out, "     nop"
-  print >> out, "     ret"
-  print >> out, "     restore"
+    print >> out, "    mov 0, %o0"
+    print >> out, "    call_exit "
+    print >> out, "    nop"
+  print >> out, "    ret"
+  print >> out, "    restore"
   print >>out,"\n! function: %s (end) " % func.id
 
 def emit_statements(out,statements):
@@ -101,20 +102,33 @@ def emit_break(out,s):
   print >>out, "\n! break (start)"
   print >>out, "! break (end)"
 
+
+##
+#acomodar el offset
+##
+
 def emit_assignment(out,s):
   print >>out, "\n! assignment(start)"
   eval_expression(out,s.expression)
-  print >>out, "!   %s := pop" %s.location.id
+  result = pop()
+  if s.location.pos:
+    eval_expression(out,s.location.pos)
+    res = pop()
+    print >>out, "    sll %s, 2, %s" % (res,res)
+    print >>out, "    add %%fp, %s, %s" % (res,res)
+    print >>out, "    st %s, [%s + offset]       ! %s := pop" % (result ,res,s.location.id)
+  else:
+    print >>out, "    st %s, [%%fp + offset]       ! %s := pop" % (result,s.location.id)
   print >>out, "! assignment (end)"
 
 def emit_print(out,s):
   print >>out, "\n! print (start)"
   label = new_label()
   print >> data, '%s:      .asciz "%s" ' % (label, s.literal.value)
-  print >>out, "         sethi %%hi(%s)" % label
-  print >>out, "         or %%o0, %%lo(%s), %%o0" % label
-  print >>out, "         call flprint"
-  print >>out, "         nop"
+  print >>out, "    sethi %%hi(%s)" % label
+  print >>out, "    or %%o0, %%lo(%s), %%o0" % label
+  print >>out, "    call flprint"
+  print >>out, "    nop"
   # eval_expression(s.expression)
   # print >>out, "!   expr := pop"
   # print >>out, "!   print(expr)"
@@ -122,30 +136,28 @@ def emit_print(out,s):
 
 def emit_read(out,s):
   print >>out, "\n! read (start)"
-  if s.location.type.name == "int":
-    print >>out, "! call flreadi (int)"
-    print >>out, "         call flreadi"
-  else:
-    print >>out, "! call flreadf (float)"
-    print >>out, "         call flreadf"
-  print >>out, "         nop"
-  print >>out, "         st %o0, result"
+  #if s.location.type.name == "int":
+  emit_statements(out,s.location)
+  print >>out, "    call flreadi         ! call flreadi (int)"
+  # else:
+  #   print >>out, "! call flreadf (float)"
+  #   print >>out, "    call flreadf"
+  print >>out, "    nop"
+  print >>out, "    st %%o0, %s" % pop()
   print >>out, "! read (end)"
 
 def emit_write(out,s):
   print >>out, "\n! write (start)"
   eval_expression(out,s.expression)
-  #print >>out, "!   expr := pop"
-  if s.expression.type.name == "int":
-    print >>out, "! call flwritei (int)"
-    print >>out, "         mov val, %o0"
-    print >>out, "         call flwritei"
-  else:
-    print >>out, "! call flwritef (float)"
-    print >>out, "         mov val, %o0"
-    print >>out, "         call flwritef"
-  print >>out, "         nop"
-  print >>out, "!   write(expr)"
+  result = pop()
+ # if s.expression.type.name == "int":
+  print >>out, "    mov %s, %%o0" % result
+  print >>out, "    call flwritei        ! call flwritei (int)"
+  # else:
+  #   print >>out, "! call flwritef (float)"
+  #   print >>out, "    mov %s, %%o0" %result
+  #   print >>out, "    call flwritef    !write(expr)"
+  print >>out, "    nop"
   print >>out, "! write (end)"
 
 def emit_while(out,s):
@@ -153,12 +165,15 @@ def emit_while(out,s):
   test_label= new_label()
   done_label= new_label()
   print >>out, "\n%s:\n" % test_label
+  tmp_pop = pop()
   eval_expression(out,s.cond)
-  print >>out, "!   relop := pop"
-  print >>out, "!   if not relop: goto %s" %done_label
+  print >>out, "    cmp %s %%g0" %tmp_pop
+  print >>out, "    be %s         !   relop == 0, exit -> goto %s" % (done_label,done_label)
+  print >>out, "    nop"
   emit_statements(out,s.body)
-  print >>out, "\n!   goto %s" %test_label
-  print >>out, "\n%s:\n" % done_label
+  print >>out, "    ba %s        !   goto %s" % (test_label,test_label)  
+  print >>out, "    nop"
+  print >>out, "\n%s:" % done_label
   print >>out, "! while (end)"
 
 def emit_if(out,s):
@@ -166,10 +181,16 @@ def emit_if(out,s):
   eval_expression(out,s.cond)
   else_label= new_label()
   next_label= new_label()
-  print >>out, "!   relop := pop"
-  print >>out, "!   if not relop: goto %s" % else_label
+  print >>out, "\n!   relop := pop"
+  tmp_pop = pop()
+  print >>out, "    cmp %s %%g0" %tmp_pop
+  print >>out, "    be %s           !   if not relop: goto %s" % (else_label,else_label)
+  print >>out, "    nop"
+  print >>out, "\n!   then:"
   emit_statements(out,s.then_b)
-  print >>out, "\n!   goto %s" %next_label
+  print >>out, "    ba %s           !   goto %s" % (next_label,next_label)
+  print >>out, "    nop"
+  print >>out, "!    else:" 
   print >>out, "\n%s:\n" %else_label
   if s.else_b:
     emit_statements(out,s.else_b)
@@ -179,61 +200,70 @@ def emit_if(out,s):
 def emit_return(out,s):
   print >>out, "\n! return (start)"
   eval_expression(out,s.expression)
-  print >>out, "!   ret := pop"
+  print >>out, "    move %s, %%i0    !   ret := pop" % pop()
   print >>out, "! return (end)"
 
 def eval_expression(out,expr):
   if expr.__class__.__name__ == "Location":
     if expr.pos:
-      print >>out, "!   index := pop" 
-      print >>out, "!   push %s[index]" % expr.id
+      eval_expression(out,expr.pos)
+      result = pop()
+      print >>out, "    sll %s, 2, %s" % (result,result)
+      print >>out, "    add %%fp, %s, %s" % (result,result)
+      print >>out, "    ld [%s + offset], %s   !   push %s[index]" % (result,push(out),expr.id)
     else:
-      print >>out, "!   push %s" %expr.id
+      print >>out, "    ld [%%fp + offset], %s   !   push %s[index]" % (push(out),expr.id)
   elif expr.__class__.__name__ == "Literal":
-    print >> out, '     mov %s, %s               ! push %s' %(expr.value,push(out),expr.value)
+    print >> out, '    mov %s, %s             ! push %s' %(expr.value,push(out),expr.value)
   elif expr.__class__.__name__ == "BinaryOp":
     eval_expression(out,expr.left)
     eval_expression(out,expr.right) 
-    r = pop(out)
-    l = pop(out)
+    r = pop()
+    l = pop()
     if expr.op == "*" or expr.op == "/":
       tmp = push(out)
-      print >>out, "     mov %s,%%o0" %l
-      print >>out, "     call .%s                ! %s %s %s -> %s" % (bin_ops[expr.op],l,expr.op,r,tmp)
-      print >>out, "     mov %s,%%o1" %r
-      print >>out, "     mov %%o0, %s             ! push" % tmp
+      print >>out, "    mov %s,%%o0" %l
+      print >>out, "    call .%s                ! %s %s %s -> %s" % (bin_ops[expr.op],l,expr.op,r,tmp)
+      print >>out, "    mov %s,%%o1" %r
+      print >>out, "    mov %%o0, %s             ! push" % tmp
     else:
       tmp = push(out)
-      print >>out, "     %s %s, %s, %s        ! %s %s %s -> %s" %(bin_ops[expr.op],l,r,tmp,l,expr.op,r,tmp)
-  else expr.__class__.__name__ == "Relation":
+      print >>out, "    %s %s, %s, %s        ! %s %s %s -> %s" %(bin_ops[expr.op],l,r,tmp,l,expr.op,r,tmp)
+  elif expr.__class__.__name__ == "Relation":
     eval_expression(out,expr.left)
     eval_expression(out,expr.right) 
-    r = pop(out)
-    l = pop(out)
+    r = pop()
+    l = pop()
     if expr.op == "and" or expr.op == "or":
       tmp = push(out)
-      print >>out, "     %s %s, %s, %s        ! %s %s %s -> %s" %(bin_ops[expr.op],l,r,tmp,l,expr.op,r,tmp)
+      print >>out, "    %s %s, %s, %s        ! %s %s %s -> %s" %(bin_ops[expr.op],l,r,tmp,l,expr.op,r,tmp)
     else:
+      eval_expression(out,expr.left)
+      eval_expression(out,expr.right) 
       tmp = push(out)
-      print >>out, "\n! %s" %(expr.op)
-      print >>out, "     cmp %s, %s           ! if %s %s %s -> %s" %(l,r,l,expr.op,r,tmp)
-      print >>out, "    %s labels" %(bin_ops[expr.op])
+      label = new_label()
+      print >>out, "    cmp %s, %s           ! if %s %s %s -> %s" %(l,r,l,expr.op,r,tmp)
+      print >>out, "    %s %s" % (bin_ops[expr.op], label)
+      print >>out, "    mov 1, %s" % tmp
+      print >>out, "    mov 0, %s" % tmp
+      print >>out, "%s:" % label
   elif expr.__class__.__name__ == "UnaryOp":
-    eval_expression(our,expr.left)
-    l = pop(out)
+    eval_expression(out,expr.right)
+    l = pop()
+    tmp = push(out)
     if expr.op == "not":
-      tmp = push(out)
-      print >>out, "     neg %s, %s        ! -%s -> %s" %(l,tmp,l,tmp)
+      print >>out, "    neg %s, %s        ! -%s -> %s" %(l,tmp,l,tmp)
     else:
-      tmp = push(out)
-      print >>out, "     %s 0, %s, %s        ! %s %s -> %s" %(un_ops[expr.op],l,tmp,expr.op,l,tmp)
+      print >>out, "    %s 0, %s, %s        ! %s %s -> %s" \
+      %(un_ops[expr.op],l,tmp,expr.op,l,tmp)
   elif expr.__class__.__name__ == "Group":
     eval_expression(out,expr.expression)
   elif expr.__class__.__name__ == "FunCall":
     num = 1
     for i in expr.parameters.expressions:
       eval_expression(out,i)
-      print >>out, "!   arg%s := pop" % str(num)
+      res = pop()
+      print >>out, "    move %s, %%o%s       !   arg%s := pop" % (res,str(num),str(num))
       num += 1
     a = "!   push %s(" %expr.id
     for i in xrange(1,num-1):
@@ -241,7 +271,8 @@ def eval_expression(out,expr):
     if num > 0:
       a+= "arg%s" % str(num-1)
     a += ")"
-    print >>out, "%s" % a
+    print >>out, "    call %s" % expr.id
+    print >>out, "    move %%i0, %s %s" % (push(out),a)
 
 
 def new_label():
@@ -266,7 +297,7 @@ def push(out):
         l_cont +=1        
     return l
     
-def pop(out):
+def pop():
     global l_cont
     global t_cont
     global sp_cont

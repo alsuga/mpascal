@@ -138,13 +138,13 @@ def _replace_escape_codes(t):
         break
       else:
         if c1=='n':
-          c='\n'
+          c='\\n'
         elif c1=='r':
-          c='\r'
+          c='\\r'
         elif c1=='t':
-          c='\t'
+          c='\\t'
         elif c1=='\\':
-          c='\\'
+          c='\\\\'
         elif c1=='"':
           c='"'
         elif c1=="b":
@@ -200,7 +200,6 @@ reserved = {
   'if':'IF',
   'else':'ELSE',
   'while':'WHILE',
-#  'const':'CONST',
   'func':'FUNC',
   'fun':'FUNC',
   'print':'PRINT',
