@@ -394,10 +394,13 @@ class GenerateCode(mpasast.NodeVisitor):
     self.visit(node.expression)
     node.gen_location = node.expression.gen_location
 
-  # def visit_FunCall(self,node):
-  #     self.visit(node.expr)
-  #     inst = ('print_'+node.expr.type.name, node.expr.gen_location)
-  #     self.code.append(inst)
+  def visit_FunCall(self,node):
+    for i in node.parameters.expressions:
+      self.visit(i)
+    target = self.new_temp(node.type)
+    node.gen_location = target
+    inst = ('store_'+node.type.name, node.gen_location)
+    self.code.append(inst)
 
 
 # STEP 3: Probar
